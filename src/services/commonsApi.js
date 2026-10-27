@@ -78,15 +78,30 @@ export async function fetchUserInfo(username) {
 }
 
 /**
- * Fetch total upload count quickly by querying list=allimages
+ * Fetch total upload count accurately using Wikimedia Toolforge XTools (File namespace 6)
+ * with MediaWiki Action API fallback.
  */
 export async function fetchTotalUploadCount(username) {
   if (!username) return 0;
-  let total = 0;
-  let contToken = null;
 
+  // 1. Try Wikimedia XTools API for namespace 6 (File:) count
+  // Accurately reports contributors with thousands of photos (e.g., Yercaud-elango: 26,190)
   try {
-    // Single fast query for first 500
+    const xtoolsUrl = `https://xtools.wmcloud.org/api/user/pages_count/commons.wikimedia.org/${encodeURIComponent(username)}/6`;
+    const res = await fetch(xtoolsUrl);
+    if (res.ok) {
+      const data = await res.json();
+      const count = data?.counts?.['6']?.count;
+      if (typeof count === 'number' && count > 0) {
+        return count;
+      }
+    }
+  } catch (err) {
+    console.warn('XTools count check fallback to allimages:', err);
+  }
+
+  // 2. Fallback: query MediaWiki allimages
+  try {
     const params = new URLSearchParams({
       action: 'query',
       list: 'allimages',
@@ -101,32 +116,16 @@ export async function fetchTotalUploadCount(username) {
     if (!res.ok) return 0;
     const data = await res.json();
     const items = data?.query?.allimages || [];
-    total += items.length;
+    let total = items.length;
 
-    // If more than 500, check continuation or count remaining
     if (data?.continue?.aicontinue) {
-      contToken = data.continue.aicontinue;
-      // Fetch next page count if needed
-      const params2 = new URLSearchParams({
-        action: 'query',
-        list: 'allimages',
-        aiuser: username,
-        aisort: 'timestamp',
-        ailimit: '500',
-        aicontinue: contToken,
-        origin: '*',
-        format: 'json',
-      });
-      const res2 = await fetch(`${API_BASE}?${params2.toString()}`);
-      if (res2.ok) {
-        const data2 = await res2.json();
-        total += (data2?.query?.allimages || []).length;
-      }
+      // More than 500 photos
+      total = items.length;
     }
     return total;
   } catch (err) {
     console.error('Failed to get total upload count:', err);
-    return total;
+    return 0;
   }
 }
 
