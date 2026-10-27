@@ -24,7 +24,7 @@ export default function CategoryFilter({
 
   return (
     <div className="bg-slate-900/95 sticky top-[137px] sm:top-[145px] z-20 border-b border-slate-800/80 backdrop-blur-md py-2.5">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="w-full px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-2">
           {/* Scroll Left Button */}
           <button

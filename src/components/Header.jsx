@@ -43,7 +43,7 @@ export default function Header({
   return (
     <header className="border-b border-slate-800 bg-slate-900/90 backdrop-blur-md sticky top-0 z-30">
       {/* Top Navbar */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="w-full px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 gap-4">
           {/* Logo & App title */}
           <div className="flex items-center gap-3 shrink-0 cursor-pointer" onClick={() => onUserChange(username)}>
@@ -125,7 +125,7 @@ export default function Header({
 
       {/* Profile & Stats Header */}
       <div className="bg-gradient-to-b from-slate-900 to-slate-850 border-t border-slate-800/60 px-4 sm:px-6 lg:px-8 py-5">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="w-full flex flex-col md:flex-row md:items-center justify-between gap-4">
           {/* User Identity */}
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-blue-500 via-indigo-600 to-purple-600 flex items-center justify-center text-white font-bold text-xl sm:text-2xl shadow-xl shadow-indigo-500/20 ring-4 ring-slate-800">

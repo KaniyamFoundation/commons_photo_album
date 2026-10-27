@@ -13,6 +13,7 @@ export default function PhotoGrid({
 }) {
   const [viewMode, setViewMode] = useState('timeline'); // 'timeline' or 'stream'
   const [layoutStyle, setLayoutStyle] = useState('grid'); // 'grid' (Google Photos square) or 'masonry'
+  const [tileSize, setTileSize] = useState('large'); // 'large', 'medium', 'compact'
   const sentinelRef = useRef(null);
 
   // Filter photos by selected category if any
@@ -52,7 +53,7 @@ export default function PhotoGrid({
       },
       {
         root: null, // viewport
-        rootMargin: '400px', // trigger 400px before bottom
+        rootMargin: '500px', // trigger 500px before bottom
         threshold: 0.05,
       }
     );
@@ -66,7 +67,7 @@ export default function PhotoGrid({
 
   if (filteredPhotos.length === 0 && !loadingMore) {
     return (
-      <div className="max-w-7xl mx-auto px-4 py-20 text-center">
+      <div className="w-full px-4 py-20 text-center">
         <div className="w-16 h-16 rounded-2xl bg-slate-800 flex items-center justify-center mx-auto mb-4 text-slate-500">
           <ImageOff className="w-8 h-8" />
         </div>
@@ -88,19 +89,32 @@ export default function PhotoGrid({
     );
   }
 
-  // Grid container classes based on layout style
+  // Dynamic grid container classes based on layout and tile size
   const getGridClasses = () => {
     if (layoutStyle === 'grid') {
-      // Stable CSS Grid: zero reflow or shifting when scrolling up/down
-      return 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-3.5';
+      if (tileSize === 'large') {
+        // Full screen wide with big prominent photos
+        return 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-4 lg:gap-5';
+      } else if (tileSize === 'medium') {
+        return 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7 gap-2.5 sm:gap-3.5';
+      } else {
+        // Compact
+        return 'grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-7 xl:grid-cols-8 2xl:grid-cols-10 gap-1.5 sm:gap-2';
+      }
     } else {
       // Masonry Columns
-      return 'columns-2 sm:columns-3 md:columns-4 lg:columns-5 gap-3.5 space-y-3.5';
+      if (tileSize === 'large') {
+        return 'columns-1 sm:columns-2 md:columns-3 lg:columns-3 xl:columns-4 2xl:columns-5 gap-4 lg:gap-5 space-y-4 lg:space-y-5';
+      } else if (tileSize === 'medium') {
+        return 'columns-2 sm:columns-3 md:columns-4 lg:columns-5 xl:columns-6 gap-3.5 space-y-3.5';
+      } else {
+        return 'columns-3 sm:columns-4 md:columns-6 lg:columns-7 xl:columns-8 gap-2 space-y-2';
+      }
     }
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div className="w-full px-3 sm:px-6 lg:px-8 py-6">
       {/* Controls Bar */}
       <div className="flex flex-wrap items-center justify-between pb-5 mb-4 border-b border-slate-800 gap-3 text-xs text-slate-400">
         <div className="flex items-center gap-2">
@@ -113,15 +127,52 @@ export default function PhotoGrid({
           )}
         </div>
 
-        {/* View & Layout Style Toggles */}
-        <div className="flex items-center gap-2">
+        {/* View, Layout Style & Size Toggles */}
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Tile Size Selector: Large, Medium, Compact */}
+          <div className="flex items-center gap-1 bg-slate-850 p-1 rounded-lg border border-slate-700/80">
+            <button
+              onClick={() => setTileSize('large')}
+              className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-colors ${
+                tileSize === 'large'
+                  ? 'bg-blue-600 text-white shadow-sm'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+              title="Large full-screen photos (Default)"
+            >
+              Large
+            </button>
+            <button
+              onClick={() => setTileSize('medium')}
+              className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                tileSize === 'medium'
+                  ? 'bg-blue-600 text-white shadow-sm'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+              title="Medium size tiles"
+            >
+              Medium
+            </button>
+            <button
+              onClick={() => setTileSize('compact')}
+              className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                tileSize === 'compact'
+                  ? 'bg-blue-600 text-white shadow-sm'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+              title="Compact overview tiles"
+            >
+              Compact
+            </button>
+          </div>
+
           {/* Timeline vs Stream View */}
           <div className="flex items-center gap-1 bg-slate-850 p-1 rounded-lg border border-slate-700/80">
             <button
               onClick={() => setViewMode('timeline')}
               className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
                 viewMode === 'timeline'
-                  ? 'bg-blue-600 text-white shadow-sm'
+                  ? 'bg-slate-700 text-white shadow-sm'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
               title="Timeline grouping by month/year"
@@ -133,7 +184,7 @@ export default function PhotoGrid({
               onClick={() => setViewMode('stream')}
               className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
                 viewMode === 'stream'
-                  ? 'bg-blue-600 text-white shadow-sm'
+                  ? 'bg-slate-700 text-white shadow-sm'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
               title="Continuous photo stream"
@@ -152,7 +203,7 @@ export default function PhotoGrid({
                   ? 'bg-slate-700 text-white shadow-sm'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
-              title="Google Photos square grid (fast, stable)"
+              title="Square grid (Google Photos style)"
             >
               <LayoutGrid className="w-3 h-3" />
               <span className="hidden md:inline">Grid</span>
@@ -179,7 +230,7 @@ export default function PhotoGrid({
           {Object.entries(groupedByTimeline).map(([period, groupPhotos]) => (
             <div key={period} className="relative">
               {/* Timeline Header (Google Photos sticky month header style) */}
-              <div className="sticky top-[180px] sm:top-[190px] z-10 py-2 mb-3 bg-slate-900/95 backdrop-blur-sm flex items-center justify-between border-b border-slate-800/60">
+              <div className="sticky top-[180px] sm:top-[190px] z-10 py-2.5 mb-4 bg-slate-900/95 backdrop-blur-md flex items-center justify-between border-b border-slate-800/80">
                 <div className="flex items-center gap-2">
                   <Calendar className="w-4 h-4 text-blue-400" />
                   <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">
