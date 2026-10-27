@@ -6,6 +6,7 @@ import PhotoLightbox from './components/PhotoLightbox';
 import LoadingSkeleton from './components/LoadingSkeleton';
 import ErrorState from './components/ErrorState';
 import Toast from './components/Toast';
+import { ArrowUp } from 'lucide-react';
 import {
   fetchUserInfo,
   fetchTotalUploadCount,
@@ -64,7 +65,24 @@ export default function App() {
   const [toastMessage, setToastMessage] = useState('');
   const [showToast, setShowToast] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [showGoTop, setShowGoTop] = useState(false);
   const isFetchingRef = useRef(false);
+
+  // Monitor scroll position for "Go to Top" button
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowGoTop(window.scrollY > 300);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  };
 
   // Sync browser URL whenever username changes
   const updateUrl = useCallback((newUsername, category = null) => {
@@ -341,6 +359,20 @@ export default function App() {
 
       {/* Toast popup */}
       <Toast message={toastMessage} visible={showToast} />
+
+      {/* Floating Go to Top Button on right side */}
+      <button
+        onClick={scrollToTop}
+        className={`fixed bottom-6 right-6 z-40 p-3 rounded-full bg-blue-600 hover:bg-blue-500 text-white shadow-2xl shadow-blue-500/40 border border-blue-400/30 transition-all duration-300 flex items-center justify-center group ${
+          showGoTop
+            ? 'opacity-100 translate-y-0 scale-100 pointer-events-auto'
+            : 'opacity-0 translate-y-4 scale-75 pointer-events-none'
+        }`}
+        title="Go to top"
+        aria-label="Go to top"
+      >
+        <ArrowUp className="w-5 h-5 transition-transform group-hover:-translate-y-0.5" />
+      </button>
 
       {/* Footer */}
       <footer className="border-t border-slate-800 bg-slate-950 py-8 px-4 text-center text-xs text-slate-500">
