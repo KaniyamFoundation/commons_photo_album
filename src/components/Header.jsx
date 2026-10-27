@@ -43,23 +43,23 @@ export default function Header({
   return (
     <header className="border-b border-slate-800 bg-slate-900/90 backdrop-blur-md sticky top-0 z-30">
       {/* Top Navbar */}
-      <div className="w-full px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 gap-4">
+      <div className="w-full px-3 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-14 sm:h-16 gap-3">
           {/* Logo & App title */}
-          <div className="flex items-center gap-3 shrink-0 cursor-pointer" onClick={() => onUserChange(username)}>
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-teal-400 flex items-center justify-center shadow-lg shadow-blue-500/20">
-              <ImageIcon className="w-5 h-5 text-white" />
+          <div className="flex items-center gap-2.5 shrink-0 cursor-pointer" onClick={() => onUserChange(username)}>
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-teal-400 flex items-center justify-center shadow-lg shadow-blue-500/20">
+              <ImageIcon className="w-4.5 h-4.5 sm:w-5 sm:h-5 text-white" />
             </div>
             <div>
-              <span className="font-bold text-lg text-white tracking-tight flex items-center gap-1.5">
+              <span className="font-bold text-base sm:text-lg text-white tracking-tight flex items-center gap-1">
                 Commons <span className="text-blue-400">Photos</span>
               </span>
             </div>
           </div>
 
-          {/* Search username input with prompt */}
-          <form onSubmit={handleSubmit} className="flex-1 max-w-xl mx-2 sm:mx-6 flex items-center gap-2.5">
-            <span className="hidden sm:inline text-xs font-medium text-slate-300 whitespace-nowrap shrink-0">
+          {/* Desktop Search username input with prompt (hidden on mobile, visible on sm+) */}
+          <form onSubmit={handleSubmit} className="hidden sm:flex flex-1 max-w-xl mx-3 lg:mx-6 items-center gap-2">
+            <span className="text-xs font-medium text-slate-300 whitespace-nowrap shrink-0">
               Give a wikimedia commons user name:
             </span>
             <div className="relative flex-1">
@@ -81,12 +81,12 @@ export default function Header({
           </form>
 
           {/* External links, Sync & Share */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             {/* Sync / Refresh cache */}
             <button
               onClick={onRefresh}
               disabled={isRefreshing}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-200 bg-slate-800 hover:bg-slate-700 hover:text-white border border-slate-700 rounded-lg transition-colors disabled:opacity-50"
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-xs font-medium text-slate-200 bg-slate-800 hover:bg-slate-700 hover:text-white border border-slate-700 rounded-lg transition-colors disabled:opacity-50"
               title="Refresh / Re-sync from Commons"
             >
               <RotateCw
@@ -100,7 +100,7 @@ export default function Header({
             {/* Share */}
             <button
               onClick={onShare}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-200 bg-slate-800 hover:bg-slate-700 hover:text-white border border-slate-700 rounded-lg transition-colors"
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-xs font-medium text-slate-200 bg-slate-800 hover:bg-slate-700 hover:text-white border border-slate-700 rounded-lg transition-colors"
               title="Share album link"
             >
               {copied ? (
@@ -116,7 +116,7 @@ export default function Header({
               href={`https://commons.wikimedia.org/wiki/Special:ListFiles/${encodeURIComponent(username)}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-300 hover:text-white bg-slate-800/50 hover:bg-slate-800 rounded-lg border border-slate-700/60 transition-colors"
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-xs font-medium text-slate-300 hover:text-white bg-slate-800/50 hover:bg-slate-800 rounded-lg border border-slate-700/60 transition-colors"
               title="Open Special:ListFiles on Commons"
             >
               <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
@@ -140,6 +140,31 @@ export default function Header({
               </svg>
             </a>
           </div>
+        </div>
+
+        {/* Mobile Dedicated Full-Width Search Bar */}
+        <div className="pb-3 pt-1 sm:hidden">
+          <form onSubmit={handleSubmit} className="w-full flex flex-col gap-1.5">
+            <label className="text-[11px] font-medium text-slate-300 px-0.5">
+              Give a wikimedia commons user name:
+            </label>
+            <div className="relative w-full">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="Give a wikimedia commons user name..."
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                className="w-full pl-10 pr-16 py-2.5 bg-slate-800 border border-slate-700/80 focus:border-blue-500 rounded-xl text-sm text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all shadow-inner"
+              />
+              <button
+                type="submit"
+                className="absolute right-1.5 top-1/2 -translate-y-1/2 px-4 py-1.5 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-xs font-bold text-white rounded-lg transition-colors shadow-md"
+              >
+                Go
+              </button>
+            </div>
+          </form>
         </div>
       </div>
 
