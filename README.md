@@ -101,5 +101,14 @@ A GitHub Actions workflow is already included in [`.github/workflows/deploy.yml`
 
 ---
 
+## 👥 About Kaniyam Foundation
+This project is developed and maintained with dedication by the **Kaniyam Foundation Team** ([கணியம் அறக்கட்டளை](https://kaniyam.com/foundation)).
+
+- **Website**: [https://kaniyam.com/foundation](https://kaniyam.com/foundation)
+- **GitHub**: [https://github.com/KaniyamFoundation](https://github.com/KaniyamFoundation)
+- **Repository**: [https://github.com/KaniyamFoundation/commons_photo_album](https://github.com/KaniyamFoundation/commons_photo_album)
+
+---
+
 ## 📄 License
 Open source and available under the MIT License.
