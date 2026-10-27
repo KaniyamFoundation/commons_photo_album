@@ -179,7 +179,8 @@ export async function fetchUserPhotos(username, continueToken = null, limit = 40
         const contentCategories = categories.filter((c) => isContentCategory(c));
 
         // Format date taken vs date uploaded
-        const dateTaken = meta.DateTimeOriginal?.value || meta.DateTime?.value || info.timestamp;
+        const rawDateTaken = meta.DateTimeOriginal?.value || meta.DateTime?.value || info.timestamp;
+        const dateTaken = cleanDateString(rawDateTaken) || rawDateTaken;
         const uploadDate = info.timestamp;
 
         // Clean description
@@ -269,19 +270,83 @@ export function formatBytes(bytes, decimals = 1) {
 }
 
 /**
- * Format date nicely
+ * Clean raw date strings from Wikimedia Commons metadata
+ * Strips HTML tags, parenthetical Exif remarks, and normalizes date text
+ */
+export function cleanDateString(str) {
+  if (!str) return null;
+  let cleaned = String(str);
+
+  // If contains HTML datetime attribute, extract that first
+  const dtAttrMatch = cleaned.match(/datetime=["']([^"']+)["']/i);
+  if (dtAttrMatch) {
+    cleaned = dtAttrMatch[1];
+  }
+
+  // Strip all HTML tags
+  cleaned = cleaned.replace(/<[^>]*>/g, ' ');
+
+  // Remove parenthetical annotations like "(according to Exif data)" or "(Exif ...)"
+  cleaned = cleaned.replace(/\s*\([^)]*\)/g, '');
+
+  // Normalize whitespace
+  cleaned = cleaned.replace(/\s+/g, ' ').trim();
+
+  return cleaned || null;
+}
+
+/**
+ * Format date nicely, stripping any HTML or EXIF annotations
  */
 export function formatDate(dateString) {
   if (!dateString) return 'Unknown date';
-  try {
-    const d = new Date(dateString);
-    if (isNaN(d.getTime())) return dateString;
+  const cleaned = cleanDateString(dateString);
+  if (!cleaned) return 'Unknown date';
+
+  // If it is just a 4-digit year e.g. "1985"
+  if (/^\d{4}$/.test(cleaned)) {
+    return cleaned;
+  }
+
+  // If it is circa or approximate year e.g. "circa 1920"
+  if (/^(circa|c\.?|about|approx\.?)\s+\d{4}$/i.test(cleaned)) {
+    return cleaned;
+  }
+
+  // Standard EXIF format: "YYYY:MM:DD HH:MM:SS"
+  let dateToParse = cleaned;
+  if (/^\d{4}:\d{2}:\d{2}/.test(dateToParse)) {
+    dateToParse = dateToParse.replace(/^(\d{4}):(\d{2}):(\d{2})/, '$1-$2-$3');
+  }
+
+  // If YYYY-MM-DD format, parse year/month/day directly to avoid timezone day shift
+  const ymdMatch = dateToParse.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+  if (ymdMatch) {
+    const year = parseInt(ymdMatch[1], 10);
+    const month = parseInt(ymdMatch[2], 10) - 1;
+    const day = parseInt(ymdMatch[3], 10);
+    const d = new Date(year, month, day);
     return d.toLocaleDateString(undefined, {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
     });
-  } catch {
-    return dateString;
   }
+
+  // General Date parse (e.g. "29 October 2011", ISO 8601, etc.)
+  try {
+    const d = new Date(dateToParse);
+    if (!isNaN(d.getTime())) {
+      return d.toLocaleDateString(undefined, {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      });
+    }
+  } catch {
+    // ignore
+  }
+
+  // Fallback to cleaned text
+  return cleaned;
 }
