@@ -60,7 +60,7 @@ export default function CategoryFilter({
             {/* "All Categories" button */}
             <button
               onClick={() => onSelectCategory(null)}
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all shadow-sm shrink-0 ${
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold whitespace-nowrap transition-all shadow-sm shrink-0 ${
                 selectedCategory === null
                   ? 'bg-blue-600 text-white shadow-blue-500/25 ring-2 ring-blue-500/50'
                   : 'bg-slate-800 hover:bg-slate-750 text-slate-300 hover:text-white border border-slate-700/80'
@@ -68,7 +68,7 @@ export default function CategoryFilter({
             >
               <span>All Categories</span>
               <span
-                className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
+                className={`px-2 py-0.5 rounded-full text-xs font-bold ${
                   selectedCategory === null
                     ? 'bg-blue-700/80 text-blue-100'
                     : 'bg-slate-700 text-slate-300'
@@ -82,12 +82,12 @@ export default function CategoryFilter({
             {selectedCategory && !topPillCategories.some((c) => c.name === selectedCategory) && (
               <button
                 onClick={() => onSelectCategory(null)}
-                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-blue-600 text-white shadow-blue-500/25 ring-2 ring-blue-500/50 whitespace-nowrap shrink-0"
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold bg-blue-600 text-white shadow-blue-500/25 ring-2 ring-blue-500/50 whitespace-nowrap shrink-0"
                 title="Click to clear filter"
               >
-                <Tag className="w-3 h-3" />
+                <Tag className="w-3.5 h-3.5" />
                 <span className="truncate max-w-[200px]">{selectedCategory}</span>
-                <X className="w-3.5 h-3.5 ml-0.5" />
+                <X className="w-4 h-4 ml-0.5" />
               </button>
             )}
 
@@ -98,7 +98,7 @@ export default function CategoryFilter({
                 <button
                   key={cat.name}
                   onClick={() => onSelectCategory(isSelected ? null : cat.name)}
-                  className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all shrink-0 ${
+                  className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap transition-all shrink-0 ${
                     isSelected
                       ? 'bg-blue-600 text-white shadow-md shadow-blue-500/25 ring-2 ring-blue-500/50'
                       : 'bg-slate-800/90 hover:bg-slate-750 text-slate-300 hover:text-white border border-slate-700/70 hover:border-slate-600'
@@ -106,7 +106,7 @@ export default function CategoryFilter({
                 >
                   <span className="truncate max-w-[200px]">{cat.name}</span>
                   <span
-                    className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
+                    className={`px-2 py-0.5 rounded-full text-xs font-bold ${
                       isSelected ? 'bg-blue-700 text-blue-100' : 'bg-slate-700/80 text-slate-400'
                     }`}
                   >
@@ -120,7 +120,7 @@ export default function CategoryFilter({
             {remainingCount > 0 && (
               <button
                 onClick={() => setModalOpen(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-800/80 hover:bg-slate-700 text-blue-400 hover:text-white border border-blue-900/40 hover:border-blue-700 whitespace-nowrap shrink-0 transition-colors"
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-semibold bg-slate-800/80 hover:bg-slate-700 text-blue-400 hover:text-white border border-blue-900/40 hover:border-blue-700 whitespace-nowrap shrink-0 transition-colors"
               >
                 <span>+{remainingCount} More...</span>
               </button>

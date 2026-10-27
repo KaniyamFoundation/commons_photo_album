@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Search,
   Share2,
@@ -27,10 +27,14 @@ export default function Header({
 }) {
   const [searchInput, setSearchInput] = useState(username || '');
 
+  useEffect(() => {
+    setSearchInput(username || '');
+  }, [username]);
+
   const handleSubmit = (e) => {
     e.preventDefault();
     const trimmed = searchInput.trim();
-    if (trimmed && trimmed.toLowerCase() !== username.toLowerCase()) {
+    if (trimmed && trimmed.toLowerCase() !== (username || '').toLowerCase()) {
       onUserChange(trimmed);
     }
   };
@@ -45,9 +49,13 @@ export default function Header({
       {/* Top Navbar */}
       <div className="w-full px-3 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14 sm:h-16 gap-3">
-          {/* Logo & App title */}
-          <div className="flex items-center gap-2.5 shrink-0 cursor-pointer" onClick={() => onUserChange(username)}>
-            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-teal-400 flex items-center justify-center shadow-lg shadow-blue-500/20">
+          {/* Logo & App title: Click to go home / landing */}
+          <div
+            className="flex items-center gap-2.5 shrink-0 cursor-pointer group"
+            onClick={() => onUserChange(null)}
+            title="Click to go to Commons Photos Home"
+          >
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-teal-400 flex items-center justify-center shadow-lg shadow-blue-500/20 group-hover:scale-105 transition-transform">
               <ImageIcon className="w-4.5 h-4.5 sm:w-5 sm:h-5 text-white" />
             </div>
             <div>
@@ -59,21 +67,21 @@ export default function Header({
 
           {/* Desktop Search username input with prompt (hidden on mobile, visible on sm+) */}
           <form onSubmit={handleSubmit} className="hidden sm:flex flex-1 max-w-xl mx-3 lg:mx-6 items-center gap-2">
-            <span className="text-xs font-medium text-slate-300 whitespace-nowrap shrink-0">
+            <span className="text-xs sm:text-sm font-medium text-slate-300 whitespace-nowrap shrink-0">
               Give a wikimedia commons user name:
             </span>
             <div className="relative flex-1">
               <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
-                placeholder="Give a wikimedia commons user name..."
+                placeholder="e.g. Tshrinivasan, Yercaud-elango..."
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 className="w-full pl-10 pr-16 py-2 bg-slate-800/80 hover:bg-slate-800 focus:bg-slate-800 border border-slate-700/80 focus:border-blue-500 rounded-full text-sm text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
               />
               <button
                 type="submit"
-                className="absolute right-1.5 top-1/2 -translate-y-1/2 px-3 py-1 bg-blue-600 hover:bg-blue-500 text-xs font-semibold text-white rounded-full transition-colors shadow"
+                className="absolute right-1.5 top-1/2 -translate-y-1/2 px-3 py-1 bg-blue-600 hover:bg-blue-500 text-xs font-semibold text-white rounded-full transition-colors shadow cursor-pointer"
               >
                 Go
               </button>
@@ -82,46 +90,50 @@ export default function Header({
 
           {/* External links, Sync & Share */}
           <div className="flex items-center gap-1.5 sm:gap-2">
-            {/* Sync / Refresh cache */}
-            <button
-              onClick={onRefresh}
-              disabled={isRefreshing}
-              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-xs font-medium text-slate-200 bg-slate-800 hover:bg-slate-700 hover:text-white border border-slate-700 rounded-lg transition-colors disabled:opacity-50"
-              title="Refresh / Re-sync from Commons"
-            >
-              <RotateCw
-                className={`w-3.5 h-3.5 text-slate-400 ${
-                  isRefreshing ? 'animate-spin text-blue-400' : ''
-                }`}
-              />
-              <span className="hidden sm:inline">Sync</span>
-            </button>
+            {username && (
+              <>
+                {/* Sync / Refresh cache */}
+                <button
+                  onClick={onRefresh}
+                  disabled={isRefreshing}
+                  className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-xs font-medium text-slate-200 bg-slate-800 hover:bg-slate-700 hover:text-white border border-slate-700 rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
+                  title="Refresh / Re-sync from Commons"
+                >
+                  <RotateCw
+                    className={`w-3.5 h-3.5 text-slate-400 ${
+                      isRefreshing ? 'animate-spin text-blue-400' : ''
+                    }`}
+                  />
+                  <span className="hidden sm:inline">Sync</span>
+                </button>
 
-            {/* Share */}
-            <button
-              onClick={onShare}
-              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-xs font-medium text-slate-200 bg-slate-800 hover:bg-slate-700 hover:text-white border border-slate-700 rounded-lg transition-colors"
-              title="Share album link"
-            >
-              {copied ? (
-                <Check className="w-3.5 h-3.5 text-green-400" />
-              ) : (
-                <Share2 className="w-3.5 h-3.5 text-slate-400" />
-              )}
-              <span className="hidden sm:inline">{copied ? 'Copied!' : 'Share'}</span>
-            </button>
+                {/* Share */}
+                <button
+                  onClick={onShare}
+                  className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-xs font-medium text-slate-200 bg-slate-800 hover:bg-slate-700 hover:text-white border border-slate-700 rounded-lg transition-colors cursor-pointer"
+                  title="Share album link"
+                >
+                  {copied ? (
+                    <Check className="w-3.5 h-3.5 text-green-400" />
+                  ) : (
+                    <Share2 className="w-3.5 h-3.5 text-slate-400" />
+                  )}
+                  <span className="hidden sm:inline">{copied ? 'Copied!' : 'Share'}</span>
+                </button>
 
-            {/* Open Special:ListFiles */}
-            <a
-              href={`https://commons.wikimedia.org/wiki/Special:ListFiles/${encodeURIComponent(username)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-xs font-medium text-slate-300 hover:text-white bg-slate-800/50 hover:bg-slate-800 rounded-lg border border-slate-700/60 transition-colors"
-              title="Open Special:ListFiles on Commons"
-            >
-              <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
-              <span className="hidden md:inline">Commons List</span>
-            </a>
+                {/* Open Special:ListFiles */}
+                <a
+                  href={`https://commons.wikimedia.org/wiki/Special:ListFiles/${encodeURIComponent(username)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 text-xs font-medium text-slate-300 hover:text-white bg-slate-800/50 hover:bg-slate-800 rounded-lg border border-slate-700/60 transition-colors"
+                  title="Open Special:ListFiles on Commons"
+                >
+                  <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
+                  <span className="hidden md:inline">Commons List</span>
+                </a>
+              </>
+            )}
 
             {/* GitHub Repo */}
             <a
@@ -145,21 +157,21 @@ export default function Header({
         {/* Mobile Dedicated Full-Width Search Bar */}
         <div className="pb-3 pt-1 sm:hidden">
           <form onSubmit={handleSubmit} className="w-full flex flex-col gap-1.5">
-            <label className="text-[11px] font-medium text-slate-300 px-0.5">
+            <label className="text-xs font-semibold text-slate-300 px-0.5">
               Give a wikimedia commons user name:
             </label>
             <div className="relative w-full">
               <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
-                placeholder="Give a wikimedia commons user name..."
+                placeholder="e.g. Tshrinivasan, Yercaud-elango..."
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 className="w-full pl-10 pr-16 py-2.5 bg-slate-800 border border-slate-700/80 focus:border-blue-500 rounded-xl text-sm text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all shadow-inner"
               />
               <button
                 type="submit"
-                className="absolute right-1.5 top-1/2 -translate-y-1/2 px-4 py-1.5 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-xs font-bold text-white rounded-lg transition-colors shadow-md"
+                className="absolute right-1.5 top-1/2 -translate-y-1/2 px-4 py-1.5 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-xs font-bold text-white rounded-lg transition-colors shadow-md cursor-pointer"
               >
                 Go
               </button>
@@ -168,98 +180,100 @@ export default function Header({
         </div>
       </div>
 
-      {/* Profile & Stats Header */}
-      <div className="bg-gradient-to-b from-slate-900 to-slate-850 border-t border-slate-800/60 px-4 sm:px-6 lg:px-8 py-5">
-        <div className="w-full flex flex-col md:flex-row md:items-center justify-between gap-4">
-          {/* User Identity */}
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-blue-500 via-indigo-600 to-purple-600 flex items-center justify-center text-white font-bold text-xl sm:text-2xl shadow-xl shadow-indigo-500/20 ring-4 ring-slate-800">
-              {getInitials(username)}
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
-                  {username}
-                </h1>
-                <a
-                  href={`https://commons.wikimedia.org/wiki/User:${encodeURIComponent(username)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-slate-400 hover:text-blue-400 transition-colors"
-                  title="Wikimedia Commons User Page"
-                >
-                  <ExternalLink className="w-4 h-4" />
-                </a>
-
-                {isFromCache && (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-950/80 text-emerald-400 border border-emerald-800/60">
-                    <Database className="w-2.5 h-2.5" />
-                    Cached
-                  </span>
-                )}
-              </div>
-              <p className="text-xs sm:text-sm text-slate-400 mt-0.5">
-                Wikimedia Commons Contributor Portfolio
-              </p>
-            </div>
-          </div>
-
-          {/* Stats Badges */}
-          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-            <div className="flex items-center gap-2 px-3.5 py-2 bg-slate-800/80 border border-slate-700/80 rounded-xl shadow-sm">
-              <div className="p-1.5 rounded-lg bg-blue-500/10 text-blue-400">
-                <ImageIcon className="w-4 h-4" />
+      {/* Profile & Stats Header: Only shown when a user is selected */}
+      {username && (
+        <div className="bg-gradient-to-b from-slate-900 to-slate-850 border-t border-slate-800/60 px-4 sm:px-6 lg:px-8 py-5">
+          <div className="w-full flex flex-col md:flex-row md:items-center justify-between gap-4">
+            {/* User Identity */}
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-blue-500 via-indigo-600 to-purple-600 flex items-center justify-center text-white font-bold text-xl sm:text-2xl shadow-xl shadow-indigo-500/20 ring-4 ring-slate-800">
+                {getInitials(username)}
               </div>
               <div>
-                <div className="text-xs text-slate-400 font-medium">Photos</div>
-                <div className="text-sm font-bold text-white">
-                  {totalUploads !== null ? totalUploads.toLocaleString() : '...'}
+                <div className="flex items-center gap-2">
+                  <h1 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
+                    {username}
+                  </h1>
+                  <a
+                    href={`https://commons.wikimedia.org/wiki/User:${encodeURIComponent(username)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-slate-400 hover:text-blue-400 transition-colors"
+                    title="Wikimedia Commons User Page"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                  </a>
+
+                  {isFromCache && (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-950/80 text-emerald-400 border border-emerald-800/60">
+                      <Database className="w-3 h-3" />
+                      Cached
+                    </span>
+                  )}
                 </div>
+                <p className="text-xs sm:text-sm text-slate-400 mt-0.5">
+                  Wikimedia Commons Contributor Portfolio
+                </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 px-3.5 py-2 bg-slate-800/80 border border-slate-700/80 rounded-xl shadow-sm">
-              <div className="p-1.5 rounded-lg bg-indigo-500/10 text-indigo-400">
-                <Layers className="w-4 h-4" />
-              </div>
-              <div>
-                <div className="text-xs text-slate-400 font-medium">Categories</div>
-                <div className="text-sm font-bold text-white">
-                  {categoriesCount !== null ? categoriesCount.toLocaleString() : '...'}
-                </div>
-              </div>
-            </div>
-
-            {userInfo?.registration && (
-              <div className="hidden sm:flex items-center gap-2 px-3.5 py-2 bg-slate-800/80 border border-slate-700/80 rounded-xl shadow-sm">
-                <div className="p-1.5 rounded-lg bg-teal-500/10 text-teal-400">
-                  <Calendar className="w-4 h-4" />
+            {/* Stats Badges */}
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+              <div className="flex items-center gap-2 px-3.5 py-2 bg-slate-800/80 border border-slate-700/80 rounded-xl shadow-sm">
+                <div className="p-1.5 rounded-lg bg-blue-500/10 text-blue-400">
+                  <ImageIcon className="w-4 h-4" />
                 </div>
                 <div>
-                  <div className="text-xs text-slate-400 font-medium">Contributor Since</div>
+                  <div className="text-xs text-slate-400 font-medium">Photos</div>
                   <div className="text-sm font-bold text-white">
-                    {formatDate(userInfo.registration)}
+                    {totalUploads !== null ? totalUploads.toLocaleString() : '...'}
                   </div>
                 </div>
               </div>
-            )}
 
-            {userInfo?.editcount !== undefined && userInfo.editcount > 0 && (
-              <div className="hidden lg:flex items-center gap-2 px-3.5 py-2 bg-slate-800/80 border border-slate-700/80 rounded-xl shadow-sm">
-                <div className="p-1.5 rounded-lg bg-purple-500/10 text-purple-400">
-                  <Award className="w-4 h-4" />
+              <div className="flex items-center gap-2 px-3.5 py-2 bg-slate-800/80 border border-slate-700/80 rounded-xl shadow-sm">
+                <div className="p-1.5 rounded-lg bg-indigo-500/10 text-indigo-400">
+                  <Layers className="w-4 h-4" />
                 </div>
                 <div>
-                  <div className="text-xs text-slate-400 font-medium">Edits</div>
+                  <div className="text-xs text-slate-400 font-medium">Categories</div>
                   <div className="text-sm font-bold text-white">
-                    {userInfo.editcount.toLocaleString()}
+                    {categoriesCount !== null ? categoriesCount.toLocaleString() : '...'}
                   </div>
                 </div>
               </div>
-            )}
+
+              {userInfo?.registration && (
+                <div className="hidden sm:flex items-center gap-2 px-3.5 py-2 bg-slate-800/80 border border-slate-700/80 rounded-xl shadow-sm">
+                  <div className="p-1.5 rounded-lg bg-teal-500/10 text-teal-400">
+                    <Calendar className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="text-xs text-slate-400 font-medium">Contributor Since</div>
+                    <div className="text-sm font-bold text-white">
+                      {formatDate(userInfo.registration)}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {userInfo?.editcount !== undefined && userInfo.editcount > 0 && (
+                <div className="hidden lg:flex items-center gap-2 px-3.5 py-2 bg-slate-800/80 border border-slate-700/80 rounded-xl shadow-sm">
+                  <div className="p-1.5 rounded-lg bg-purple-500/10 text-purple-400">
+                    <Award className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="text-xs text-slate-400 font-medium">Edits</div>
+                    <div className="text-sm font-bold text-white">
+                      {userInfo.editcount.toLocaleString()}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </header>
   );
 }

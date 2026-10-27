@@ -286,11 +286,11 @@ export default function PhotoLightbox({
 
         {/* Info Sidebar: Always docked on the right side with 100% copiable text */}
         {showInfo && (
-          <aside className="w-full md:w-80 lg:w-96 bg-slate-900 border-t md:border-t-0 md:border-l border-white/10 flex flex-col overflow-y-auto shrink-0 z-20 h-72 md:h-full max-h-[50vh] md:max-h-full shadow-2xl select-text">
+          <aside className="w-full md:w-80 lg:w-96 bg-slate-900 border-t md:border-t-0 md:border-l border-white/10 flex flex-col overflow-y-auto shrink-0 z-20 h-80 md:h-full max-h-[60vh] md:max-h-full shadow-2xl select-text">
             {/* Drawer Header */}
-            <div className="p-4 border-b border-slate-800 flex items-center justify-between shrink-0 select-none">
+            <div className="p-3.5 sm:p-4 border-b border-slate-800 flex items-center justify-between shrink-0 select-none">
               <div className="flex items-center gap-2">
-                <h3 className="font-bold text-white text-sm">Info & Details</h3>
+                <h3 className="font-bold text-white text-sm sm:text-base">Info & Details</h3>
                 <button
                   onClick={handleCopyAllInfo}
                   className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold text-slate-200 hover:text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 transition-colors shadow-sm"
@@ -311,18 +311,18 @@ export default function PhotoLightbox({
               </div>
               <button
                 onClick={() => setShowInfo(false)}
-                className="p-1 rounded-md text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+                className="p-1.5 rounded-md text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
                 title="Hide info panel"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <div className="p-5 space-y-6 flex-1 text-xs select-text">
+            <div className="p-4 sm:p-5 space-y-5 sm:space-y-6 flex-1 text-sm select-text">
               {/* Title & Description */}
               <div className="group/title relative">
                 <div className="flex items-start justify-between gap-2">
-                  <h2 className="text-base font-bold text-white leading-snug break-words select-text cursor-text flex-1">
+                  <h2 className="text-base sm:text-lg font-bold text-white leading-snug break-words select-text cursor-text flex-1">
                     {photo.title}
                   </h2>
                   <button
@@ -331,15 +331,15 @@ export default function PhotoLightbox({
                     title="Copy title"
                   >
                     {copiedField === 'title' ? (
-                      <Check className="w-3.5 h-3.5 text-green-400" />
+                      <Check className="w-4 h-4 text-green-400" />
                     ) : (
-                      <Copy className="w-3.5 h-3.5" />
+                      <Copy className="w-4 h-4" />
                     )}
                   </button>
                 </div>
                 {photo.description && photo.description !== photo.title && (
                   <div className="mt-2.5 flex items-start justify-between gap-2 p-3 rounded-lg bg-slate-850/70 border border-slate-800">
-                    <p className="text-slate-300 leading-relaxed text-xs break-words select-text cursor-text flex-1">
+                    <p className="text-slate-300 leading-relaxed text-xs sm:text-sm break-words select-text cursor-text flex-1">
                       {photo.description}
                     </p>
                     <button
@@ -348,9 +348,9 @@ export default function PhotoLightbox({
                       title="Copy description"
                     >
                       {copiedField === 'description' ? (
-                        <Check className="w-3.5 h-3.5 text-green-400" />
+                        <Check className="w-4 h-4 text-green-400" />
                       ) : (
-                        <Copy className="w-3.5 h-3.5" />
+                        <Copy className="w-4 h-4" />
                       )}
                     </button>
                   </div>
@@ -358,14 +358,14 @@ export default function PhotoLightbox({
               </div>
 
               {/* Contributor / Attribution */}
-              <div className="flex items-center justify-between gap-2 p-3 rounded-xl bg-slate-850 border border-slate-800">
-                <div className="flex items-center gap-2.5 min-w-0 flex-1 select-text">
-                  <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-white text-xs shrink-0 select-none">
+              <div className="flex items-center justify-between gap-2 p-3 sm:p-3.5 rounded-xl bg-slate-850 border border-slate-800">
+                <div className="flex items-center gap-3 min-w-0 flex-1 select-text">
+                  <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-white text-sm shrink-0 select-none">
                     {artistName.charAt(0).toUpperCase()}
                   </div>
                   <div className="min-w-0 flex-1 select-text">
-                    <div className="text-[10px] text-slate-400 select-text">Contributor</div>
-                    <div className="text-xs font-semibold text-white truncate cursor-text select-text">
+                    <div className="text-xs text-slate-400 font-medium select-text">Contributor</div>
+                    <div className="text-sm font-semibold text-white truncate cursor-text select-text">
                       {artistName}
                     </div>
                   </div>
@@ -376,9 +376,9 @@ export default function PhotoLightbox({
                   title="Copy contributor name"
                 >
                   {copiedField === 'artist' ? (
-                    <Check className="w-3.5 h-3.5 text-green-400" />
+                    <Check className="w-4 h-4 text-green-400" />
                   ) : (
-                    <Copy className="w-3.5 h-3.5" />
+                    <Copy className="w-4 h-4" />
                   )}
                 </button>
               </div>
@@ -389,8 +389,8 @@ export default function PhotoLightbox({
                   <div className="flex items-start gap-3 select-text flex-1">
                     <Calendar className="w-4 h-4 text-blue-400 shrink-0 mt-0.5 select-none" />
                     <div className="select-text">
-                      <div className="text-slate-400 text-[11px] select-text">Date Taken</div>
-                      <div className="text-slate-200 font-medium select-text cursor-text">
+                      <div className="text-slate-400 text-xs font-medium select-text">Date Taken</div>
+                      <div className="text-slate-200 text-sm font-medium select-text cursor-text mt-0.5">
                         {formatDate(photo.dateTaken)}
                       </div>
                     </div>
@@ -401,9 +401,9 @@ export default function PhotoLightbox({
                     title="Copy date taken"
                   >
                     {copiedField === 'dateTaken' ? (
-                      <Check className="w-3.5 h-3.5 text-green-400" />
+                      <Check className="w-4 h-4 text-green-400" />
                     ) : (
-                      <Copy className="w-3.5 h-3.5" />
+                      <Copy className="w-4 h-4" />
                     )}
                   </button>
                 </div>
@@ -413,8 +413,8 @@ export default function PhotoLightbox({
                     <div className="flex items-start gap-3 select-text flex-1">
                       <Calendar className="w-4 h-4 text-teal-400 shrink-0 mt-0.5 select-none" />
                       <div className="select-text">
-                        <div className="text-slate-400 text-[11px] select-text">Uploaded to Commons</div>
-                        <div className="text-slate-200 font-medium select-text cursor-text">
+                        <div className="text-slate-400 text-xs font-medium select-text">Uploaded to Commons</div>
+                        <div className="text-slate-200 text-sm font-medium select-text cursor-text mt-0.5">
                           {formatDate(photo.uploadDate)}
                         </div>
                       </div>
@@ -425,9 +425,9 @@ export default function PhotoLightbox({
                       title="Copy upload date"
                     >
                       {copiedField === 'uploadDate' ? (
-                        <Check className="w-3.5 h-3.5 text-green-400" />
+                        <Check className="w-4 h-4 text-green-400" />
                       ) : (
-                        <Copy className="w-3.5 h-3.5" />
+                        <Copy className="w-4 h-4" />
                       )}
                     </button>
                   </div>
@@ -435,14 +435,14 @@ export default function PhotoLightbox({
               </div>
 
               {/* Photo Dimensions & Size */}
-              <div className="p-3.5 rounded-xl bg-slate-850 border border-slate-800 space-y-2.5 select-text">
+              <div className="p-3.5 rounded-xl bg-slate-850 border border-slate-800 space-y-3 select-text">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-slate-300 select-text">
-                    <Maximize2 className="w-3.5 h-3.5 text-indigo-400 select-none" />
+                  <div className="flex items-center gap-2 text-slate-300 text-xs sm:text-sm select-text">
+                    <Maximize2 className="w-4 h-4 text-indigo-400 select-none" />
                     <span>Resolution</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <span className="font-semibold text-white select-text cursor-text">
+                    <span className="font-semibold text-white text-xs sm:text-sm select-text cursor-text">
                       {photo.width} × {photo.height} {megaPixels ? `(${megaPixels} MP)` : ''}
                     </span>
                     <button
@@ -456,9 +456,9 @@ export default function PhotoLightbox({
                       title="Copy resolution"
                     >
                       {copiedField === 'resolution' ? (
-                        <Check className="w-3 h-3 text-green-400" />
+                        <Check className="w-3.5 h-3.5 text-green-400" />
                       ) : (
-                        <Copy className="w-3 h-3" />
+                        <Copy className="w-3.5 h-3.5" />
                       )}
                     </button>
                   </div>
@@ -466,12 +466,12 @@ export default function PhotoLightbox({
 
                 {photo.fileSize > 0 && (
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-slate-300 select-text">
-                      <HardDrive className="w-3.5 h-3.5 text-purple-400 select-none" />
+                    <div className="flex items-center gap-2 text-slate-300 text-xs sm:text-sm select-text">
+                      <HardDrive className="w-4 h-4 text-purple-400 select-none" />
                       <span>File Size</span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <span className="font-semibold text-white select-text cursor-text">
+                      <span className="font-semibold text-white text-xs sm:text-sm select-text cursor-text">
                         {formatBytes(photo.fileSize)}
                       </span>
                       <button
@@ -480,9 +480,9 @@ export default function PhotoLightbox({
                         title="Copy file size"
                       >
                         {copiedField === 'filesize' ? (
-                          <Check className="w-3 h-3 text-green-400" />
+                          <Check className="w-3.5 h-3.5 text-green-400" />
                         ) : (
-                          <Copy className="w-3 h-3" />
+                          <Copy className="w-3.5 h-3.5" />
                         )}
                       </button>
                     </div>
@@ -491,8 +491,8 @@ export default function PhotoLightbox({
 
                 {latFormatted && lngFormatted && (
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-slate-300 select-text">
-                      <MapPin className="w-3.5 h-3.5 text-rose-400 select-none" />
+                    <div className="flex items-center gap-2 text-slate-300 text-xs sm:text-sm select-text">
+                      <MapPin className="w-4 h-4 text-rose-400 select-none" />
                       <span>Coordinates</span>
                     </div>
                     <div className="flex items-center gap-1.5">
@@ -500,7 +500,7 @@ export default function PhotoLightbox({
                         href={`https://maps.google.com/?q=${photo.gps.lat},${photo.gps.lng}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-blue-400 hover:underline font-mono text-[10px] select-text cursor-text"
+                        className="text-blue-400 hover:underline font-mono text-xs select-text cursor-text"
                       >
                         {latFormatted}, {lngFormatted}
                       </a>
@@ -510,9 +510,9 @@ export default function PhotoLightbox({
                         title="Copy coordinates"
                       >
                         {copiedField === 'coords' ? (
-                          <Check className="w-3 h-3 text-green-400" />
+                          <Check className="w-3.5 h-3.5 text-green-400" />
                         ) : (
-                          <Copy className="w-3 h-3" />
+                          <Copy className="w-3.5 h-3.5" />
                         )}
                       </button>
                     </div>
@@ -521,12 +521,12 @@ export default function PhotoLightbox({
               </div>
 
               {/* License & Rights */}
-              <div className="flex items-start justify-between gap-2 p-3 rounded-xl bg-slate-850 border border-slate-800 select-text">
+              <div className="flex items-start justify-between gap-2 p-3 sm:p-3.5 rounded-xl bg-slate-850 border border-slate-800 select-text">
                 <div className="flex items-start gap-3 min-w-0 flex-1 select-text">
                   <Award className="w-4 h-4 text-amber-400 shrink-0 mt-0.5 select-none" />
                   <div className="min-w-0 flex-1 select-text">
-                    <div className="text-[10px] text-slate-400 select-text">License</div>
-                    <div className="text-xs font-semibold text-white select-text cursor-text">
+                    <div className="text-xs text-slate-400 font-medium select-text">License</div>
+                    <div className="text-sm font-semibold text-white select-text cursor-text mt-0.5">
                       {photo.license}
                     </div>
                     {photo.licenseUrl && (
@@ -534,9 +534,9 @@ export default function PhotoLightbox({
                         href={photo.licenseUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-[10px] text-blue-400 hover:underline inline-flex items-center gap-1 mt-0.5"
+                        className="text-xs text-blue-400 hover:underline inline-flex items-center gap-1 mt-1 font-medium"
                       >
-                        View license deed <ExternalLink className="w-2.5 h-2.5" />
+                        View license deed <ExternalLink className="w-3 h-3" />
                       </a>
                     )}
                   </div>
@@ -547,9 +547,9 @@ export default function PhotoLightbox({
                   title="Copy license name"
                 >
                   {copiedField === 'license' ? (
-                    <Check className="w-3.5 h-3.5 text-green-400" />
+                    <Check className="w-4 h-4 text-green-400" />
                   ) : (
-                    <Copy className="w-3.5 h-3.5" />
+                    <Copy className="w-4 h-4" />
                   )}
                 </button>
               </div>
@@ -557,30 +557,30 @@ export default function PhotoLightbox({
               {/* Categories */}
               {photo.categories && photo.categories.length > 0 && (
                 <div className="select-text">
-                  <div className="flex items-center justify-between text-slate-400 text-xs mb-2 select-none">
+                  <div className="flex items-center justify-between text-slate-300 text-xs sm:text-sm font-medium mb-2.5 select-none">
                     <div className="flex items-center gap-1.5">
-                      <Tag className="w-3.5 h-3.5 text-blue-400" />
+                      <Tag className="w-4 h-4 text-blue-400" />
                       <span>Categories ({photo.categories.length})</span>
                     </div>
                     <button
                       onClick={() => copyToClipboard(photo.categories.join(', '), 'categories')}
-                      className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+                      className="flex items-center gap-1 px-2 py-0.5 rounded text-xs text-slate-300 hover:text-white hover:bg-slate-800 transition-colors font-semibold"
                       title="Copy list of all categories"
                     >
                       {copiedField === 'categories' ? (
                         <>
-                          <Check className="w-3 h-3 text-green-400" />
+                          <Check className="w-3.5 h-3.5 text-green-400" />
                           <span className="text-green-400">Copied</span>
                         </>
                       ) : (
                         <>
-                          <Copy className="w-3 h-3" />
+                          <Copy className="w-3.5 h-3.5" />
                           <span>Copy List</span>
                         </>
                       )}
                     </button>
                   </div>
-                  <div className="flex flex-wrap gap-1.5 max-h-48 overflow-y-auto pr-1 select-text">
+                  <div className="flex flex-wrap gap-2 max-h-52 overflow-y-auto pr-1 select-text">
                     {photo.categories.map((cat) => (
                       <button
                         key={cat}
@@ -588,7 +588,7 @@ export default function PhotoLightbox({
                           onFilterByCategory(cat);
                           onClose();
                         }}
-                        className="px-2 py-1 rounded-md bg-slate-850 hover:bg-blue-600/30 text-slate-300 hover:text-blue-200 border border-slate-700/80 text-[11px] transition-colors truncate max-w-full text-left select-text cursor-pointer"
+                        className="px-2.5 py-1.5 rounded-lg bg-slate-850 hover:bg-blue-600/30 text-slate-200 hover:text-blue-200 border border-slate-700 text-xs sm:text-xs font-medium transition-colors truncate max-w-full text-left select-text cursor-pointer"
                         title={`Filter gallery by "${cat}"`}
                       >
                         {cat}
@@ -599,19 +599,19 @@ export default function PhotoLightbox({
               )}
 
               {/* Direct Full Commons Page Button & Copy URL */}
-              <div className="flex items-center gap-2 select-none">
+              <div className="flex items-center gap-2 select-none pt-2">
                 <a
                   href={photo.commonsUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-semibold text-xs transition-colors shadow-lg shadow-blue-600/20"
+                  className="flex-1 flex items-center justify-center gap-2 py-3 px-4 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-semibold text-xs sm:text-sm transition-colors shadow-lg shadow-blue-600/20"
                 >
                   <span>Open on Wikimedia Commons</span>
-                  <ExternalLink className="w-3.5 h-3.5" />
+                  <ExternalLink className="w-4 h-4" />
                 </a>
                 <button
                   onClick={() => copyToClipboard(photo.commonsUrl, 'commonsUrl')}
-                  className="p-2.5 rounded-xl bg-slate-850 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700/80 transition-colors shrink-0"
+                  className="p-3 rounded-xl bg-slate-850 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700/80 transition-colors shrink-0"
                   title="Copy Wikimedia Commons page URL"
                 >
                   {copiedField === 'commonsUrl' ? (
