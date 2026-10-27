@@ -148,7 +148,7 @@ export async function fetchUserPhotos(username, continueToken = null, limit = 40
     gailimit: limit.toString(),
     prop: 'imageinfo|categories',
     iiprop: 'url|timestamp|user|dimensions|extmetadata|size',
-    iiurlwidth: '800', // high quality thumbnail for responsive grids & retina displays
+    iiurlwidth: '500', // standard Wikimedia cached thumbnail width (fast, crisp, low bandwidth)
     cllimit: 'max',
     origin: '*',
     format: 'json',
