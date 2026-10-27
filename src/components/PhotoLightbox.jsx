@@ -13,8 +13,8 @@ import {
   Check,
   Maximize2,
   HardDrive,
-  Camera,
   MapPin,
+  Loader2,
 } from 'lucide-react';
 import { formatDate, formatBytes } from '../services/commonsApi';
 
@@ -25,13 +25,20 @@ export default function PhotoLightbox({
   onSelectPhoto,
   onFilterByCategory,
 }) {
-  const [showInfo, setShowInfo] = useState(true);
+  // Show info drawer by default only on desktop screens so mobile shows the photo full-screen
+  const [showInfo, setShowInfo] = useState(() => window.innerWidth >= 1024);
   const [copied, setCopied] = useState(false);
   const [touchStart, setTouchStart] = useState(null);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   const currentIndex = photos.findIndex((p) => p.id === photo.id);
   const hasPrev = currentIndex > 0;
   const hasNext = currentIndex < photos.length - 1;
+
+  // Reset imageLoaded whenever photo changes
+  useEffect(() => {
+    setImageLoaded(false);
+  }, [photo.id]);
 
   const handlePrev = () => {
     if (hasPrev) onSelectPhoto(photos[currentIndex - 1]);
@@ -76,16 +83,21 @@ export default function PhotoLightbox({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // Calculate megapixels
+  // Safe megapixels calculation
   const megaPixels =
     photo.width && photo.height
       ? ((photo.width * photo.height) / 1000000).toFixed(1)
       : null;
 
+  // Safe coordinates formatting
+  const latFormatted = photo.gps?.lat ? Number(photo.gps.lat).toFixed(4) : null;
+  const lngFormatted = photo.gps?.lng ? Number(photo.gps.lng).toFixed(4) : null;
+  const artistName = photo.artist || 'Contributor';
+
   return (
-    <div className="fixed inset-0 z-50 bg-black/95 flex flex-col backdrop-blur-md select-none overflow-hidden">
+    <div className="fixed inset-0 z-50 bg-black/95 flex flex-col backdrop-blur-md select-none overflow-hidden animate-in fade-in duration-150">
       {/* Top Navigation Bar */}
-      <div className="h-14 px-4 flex items-center justify-between border-b border-white/10 bg-black/40 z-20 shrink-0">
+      <div className="h-14 px-4 flex items-center justify-between border-b border-white/10 bg-black/60 z-30 shrink-0">
         <div className="flex items-center gap-3">
           <button
             onClick={onClose}
@@ -122,15 +134,16 @@ export default function PhotoLightbox({
             <Download className="w-4 h-4" />
           </a>
 
-          {/* Open on Commons */}
+          {/* Open full page on Commons */}
           <a
             href={photo.commonsUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="p-2 rounded-full hover:bg-white/10 text-white/80 hover:text-white transition-colors"
-            title="View on Wikimedia Commons"
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-full hover:bg-white/10 text-xs text-blue-400 hover:text-white transition-colors border border-blue-500/30"
+            title="Open file page on Wikimedia Commons"
           >
-            <ExternalLink className="w-4 h-4" />
+            <ExternalLink className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Commons Page</span>
           </a>
 
           {/* Toggle Info Drawer */}
@@ -165,13 +178,23 @@ export default function PhotoLightbox({
             </button>
           )}
 
-          {/* Photo */}
-          <div className="max-w-full max-h-full flex items-center justify-center">
+          {/* Photo with progressive loading */}
+          <div className="max-w-full max-h-full flex items-center justify-center relative">
+            {/* Loading spinner while high-res loads */}
+            {!imageLoaded && (
+              <div className="absolute inset-0 flex items-center justify-center z-10">
+                <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+              </div>
+            )}
+
             <img
               key={photo.id}
               src={photo.originalUrl || photo.thumbUrl}
               alt={photo.title}
-              className="max-h-[calc(100vh-70px)] max-w-full object-contain rounded-lg shadow-2xl transition-all duration-200 select-none"
+              onLoad={() => setImageLoaded(true)}
+              className={`max-h-[calc(100vh-80px)] max-w-full object-contain rounded-lg shadow-2xl transition-opacity duration-300 select-none ${
+                imageLoaded ? 'opacity-100' : 'opacity-40'
+              }`}
             />
           </div>
 
@@ -217,11 +240,11 @@ export default function PhotoLightbox({
               {/* Contributor */}
               <div className="flex items-center gap-2.5 p-3 rounded-xl bg-slate-850 border border-slate-800">
                 <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-white text-xs">
-                  {photo.artist.charAt(0).toUpperCase()}
+                  {artistName.charAt(0).toUpperCase()}
                 </div>
                 <div className="truncate">
                   <div className="text-[10px] text-slate-400">Contributor</div>
-                  <div className="text-xs font-semibold text-white truncate">{photo.artist}</div>
+                  <div className="text-xs font-semibold text-white truncate">{artistName}</div>
                 </div>
               </div>
 
@@ -274,7 +297,7 @@ export default function PhotoLightbox({
                   </div>
                 )}
 
-                {photo.gps && (
+                {latFormatted && lngFormatted && (
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 text-slate-300">
                       <MapPin className="w-3.5 h-3.5 text-rose-400" />
@@ -286,7 +309,7 @@ export default function PhotoLightbox({
                       rel="noopener noreferrer"
                       className="text-blue-400 hover:underline font-mono text-[10px]"
                     >
-                      {photo.gps.lat.toFixed(4)}, {photo.gps.lng.toFixed(4)}
+                      {latFormatted}, {lngFormatted}
                     </a>
                   </div>
                 )}
@@ -336,14 +359,14 @@ export default function PhotoLightbox({
                 </div>
               )}
 
-              {/* Direct Commons Button */}
+              {/* Direct Full Commons Page Button */}
               <a
                 href={photo.commonsUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-slate-800 hover:bg-slate-750 text-white rounded-xl border border-slate-700 text-xs font-semibold transition-colors"
+                className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-semibold text-xs transition-colors shadow-lg shadow-blue-600/20"
               >
-                <span>Open in Wikimedia Commons</span>
+                <span>Open Full Page on Wikimedia Commons</span>
                 <ExternalLink className="w-3.5 h-3.5" />
               </a>
             </div>

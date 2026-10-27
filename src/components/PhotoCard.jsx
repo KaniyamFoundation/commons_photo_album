@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Tag, Maximize2, Image as ImageIcon } from 'lucide-react';
+import { Calendar, Tag, Maximize2, ExternalLink, Image as ImageIcon } from 'lucide-react';
 import { formatDate } from '../services/commonsApi';
 
 export default function PhotoCard({ photo, onClick, isSquare = true }) {
@@ -77,8 +77,20 @@ export default function PhotoCard({ photo, onClick, isSquare = true }) {
             <span className="text-[10px] font-semibold text-white/90 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded-full border border-white/10">
               {photo.width} × {photo.height}
             </span>
-            <div className="p-1 rounded-full bg-black/60 text-white/80 backdrop-blur-md">
-              <Maximize2 className="w-3.5 h-3.5" />
+            <div className="flex items-center gap-1.5 pointer-events-auto">
+              <a
+                href={photo.commonsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="p-1 rounded-full bg-black/60 hover:bg-blue-600 text-white/80 hover:text-white backdrop-blur-md transition-colors"
+                title="Open full page on Commons"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+              <div className="p-1 rounded-full bg-black/60 text-white/80 backdrop-blur-md">
+                <Maximize2 className="w-3.5 h-3.5" />
+              </div>
             </div>
           </div>
 
