@@ -49,7 +49,7 @@ export default function CategoryFilter({
                   : 'bg-slate-800 hover:bg-slate-750 text-slate-300 hover:text-white border border-slate-700/80'
               }`}
             >
-              <span>All Photos</span>
+              <span>All Categories</span>
               <span
                 className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
                   selectedCategory === null
