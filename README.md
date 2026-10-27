@@ -101,11 +101,12 @@ A GitHub Actions workflow is already included in [`.github/workflows/deploy.yml`
 
 ---
 
-## 👥 About Kaniyam Foundation
-This project is developed and maintained with dedication by the **Kaniyam Foundation Team** ([கணியம் அறக்கட்டளை](https://kaniyam.com/foundation)).
+## 👥 About & Credits
+Made with dedication by **Kaniyam Foundation** and **Antigravity**.
 
-- **Website**: [https://kaniyam.com/foundation](https://kaniyam.com/foundation)
-- **GitHub**: [https://github.com/KaniyamFoundation](https://github.com/KaniyamFoundation)
+- **🤖 AI-Written Code**: 100% written and pair-programmed with Google DeepMind's Antigravity AI assistant.
+- **Organization**: [Kaniyam Foundation](https://kaniyam.com/foundation) ([கணியம் அறக்கட்டளை](https://kaniyam.com/foundation))
+- **Live Showcase**: [https://kaniyamfoundation.github.io/commons_photo_album/](https://kaniyamfoundation.github.io/commons_photo_album/)
 - **Repository**: [https://github.com/KaniyamFoundation/commons_photo_album](https://github.com/KaniyamFoundation/commons_photo_album)
 
 ---
