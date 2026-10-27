@@ -4,8 +4,8 @@
  * Falls back to localStorage if IndexedDB is unavailable.
  */
 
-const DB_NAME = 'CommonsPhotoAlbumDB';
-const DB_VERSION = 1;
+const DB_NAME = 'CommonsPhotoAlbumDB_v2';
+const DB_VERSION = 2;
 const STORE_NAME = 'user_albums';
 
 // Open or initialize the IndexedDB database

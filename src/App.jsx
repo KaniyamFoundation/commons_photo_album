@@ -95,13 +95,28 @@ export default function App() {
         const cached = await getCachedContributor(userToLoad);
         if (cached && cached.photos && cached.photos.length > 0) {
           setUserInfo(cached.userInfo);
-          setTotalUploads(cached.totalUploads);
+          // If totalUploads was capped at 1000 by previous bug, show loading until fresh count arrives
+          if (cached.totalUploads === 1000) {
+            setTotalUploads(null);
+          } else {
+            setTotalUploads(cached.totalUploads);
+          }
           setPhotos(cached.photos);
           setContinueToken(cached.continueToken);
           setHasMore(cached.hasMore);
           setIsFromCache(true);
           setLoading(false);
-          // Fast cached render complete!
+
+          // Always revalidate total uploads count in background
+          fetchTotalUploadCount(userToLoad).then((freshCount) => {
+            if (freshCount && freshCount > 0) {
+              setTotalUploads(freshCount);
+              saveCachedContributor(userToLoad, {
+                ...cached,
+                totalUploads: freshCount,
+              });
+            }
+          });
           return;
         }
       } catch (e) {
