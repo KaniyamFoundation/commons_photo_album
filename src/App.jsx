@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import Header from './components/Header';
 import CategoryFilter from './components/CategoryFilter';
 import PhotoGrid from './components/PhotoGrid';
