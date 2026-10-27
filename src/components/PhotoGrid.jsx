@@ -324,7 +324,7 @@ export default function PhotoGrid({
           {groupedByTimeline.map(([period, groupPhotos]) => (
             <div key={period} className="relative">
               {/* Timeline Header (Google Photos sticky month header style) */}
-              <div className="sticky top-[180px] sm:top-[190px] z-10 py-2.5 mb-4 bg-slate-900/95 backdrop-blur-md flex items-center justify-between border-b border-slate-800/80">
+              <div className="sticky top-[96px] sm:top-[104px] z-10 py-2.5 mb-4 bg-slate-900/95 backdrop-blur-md flex items-center justify-between border-b border-slate-800/80">
                 <div className="flex items-center gap-2">
                   <Calendar className="w-4 h-4 text-blue-400" />
                   <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">

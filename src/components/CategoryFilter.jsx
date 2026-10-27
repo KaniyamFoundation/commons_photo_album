@@ -40,7 +40,7 @@ export default function CategoryFilter({
   const remainingCount = categories.length - topPillCategories.length;
 
   return (
-    <div className="bg-slate-900/95 sticky top-[137px] sm:top-[145px] z-20 border-b border-slate-800/80 backdrop-blur-md py-2.5">
+    <div className="bg-slate-900/95 sticky top-14 sm:top-16 z-20 border-b border-slate-800/80 backdrop-blur-md py-2">
       <div className="w-full px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-2">
           {/* Scroll Left Button */}
