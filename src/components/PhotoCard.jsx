@@ -1,51 +1,38 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Calendar, Tag, Maximize2, Image as ImageIcon } from 'lucide-react';
 import { formatDate } from '../services/commonsApi';
 
 export default function PhotoCard({ photo, onClick, isSquare = true }) {
-  const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
   const [imgSrc, setImgSrc] = useState(photo.thumbUrl);
   const [retried, setRetried] = useState(false);
-  const imgRef = useRef(null);
 
-  // Sync imgSrc if photo changes
+  // Sync if photo changes
   useEffect(() => {
     setImgSrc(photo.thumbUrl);
-    setLoaded(false);
     setError(false);
     setRetried(false);
   }, [photo.thumbUrl]);
 
-  // Check if image is already cached by browser on mount
-  useEffect(() => {
-    if (imgRef.current && imgRef.current.complete && imgRef.current.naturalWidth > 0) {
-      setLoaded(true);
-    }
-  }, [imgSrc]);
-
   const handleError = () => {
-    // If thumbnail failed, retry once with the original URL or high-res URL
+    // If thumbnail failed, fallback once to the original Commons URL
     if (!retried && photo.originalUrl && photo.originalUrl !== imgSrc) {
       setRetried(true);
       setImgSrc(photo.originalUrl);
     } else {
       setError(true);
-      setLoaded(true);
     }
   };
 
   return (
     <div
       onClick={() => onClick(photo)}
-      className="group relative rounded-xl overflow-hidden bg-slate-800 cursor-pointer shadow-sm hover:shadow-xl hover:shadow-black/50 transition-all duration-200 transform hover:-translate-y-0.5 border border-slate-800/80 hover:border-slate-700 select-none"
+      className="group relative rounded-xl overflow-hidden bg-slate-850 cursor-pointer shadow-sm hover:shadow-xl hover:shadow-black/50 transition-all duration-200 transform hover:-translate-y-0.5 border border-slate-800/80 hover:border-slate-700 select-none"
     >
       {/* Aspect Ratio Container */}
       <div
         className={`w-full relative overflow-hidden bg-slate-850 ${
-          isSquare
-            ? 'aspect-square'
-            : ''
+          isSquare ? 'aspect-square' : ''
         }`}
         style={
           !isSquare
@@ -58,30 +45,24 @@ export default function PhotoCard({ photo, onClick, isSquare = true }) {
             : undefined
         }
       >
-        {/* Placeholder background shimmer while loading */}
-        {!loaded && !error && (
-          <div className="absolute inset-0 bg-slate-800 animate-pulse flex items-center justify-center">
-            <ImageIcon className="w-6 h-6 text-slate-700 animate-pulse" />
-          </div>
-        )}
+        {/* Subtle background placeholder (sits underneath image) */}
+        <div className="absolute inset-0 bg-slate-800 flex items-center justify-center">
+          <ImageIcon className="w-6 h-6 text-slate-700/60" />
+        </div>
 
-        {/* Thumbnail Image */}
+        {/* Thumbnail Image - NEVER hidden with opacity-0 */}
         {!error ? (
           <img
-            ref={imgRef}
             src={imgSrc}
             alt={photo.title}
             loading="lazy"
             decoding="async"
-            onLoad={() => setLoaded(true)}
             onError={handleError}
-            className={`absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 ${
-              loaded ? 'opacity-100' : 'opacity-0'
-            }`}
+            className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 z-10"
           />
         ) : (
           /* Fallback when image fails completely */
-          <div className="absolute inset-0 flex flex-col items-center justify-center p-3 text-center bg-slate-850 text-slate-400">
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center p-3 text-center bg-slate-850 text-slate-400">
             <ImageIcon className="w-8 h-8 text-slate-600 mb-1.5" />
             <span className="text-[11px] font-medium text-slate-400 line-clamp-2 px-1">
               {photo.title}
@@ -90,7 +71,7 @@ export default function PhotoCard({ photo, onClick, isSquare = true }) {
         )}
 
         {/* Dark gradient overlay on hover */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col justify-between p-3">
+        <div className="absolute inset-0 z-20 bg-gradient-to-t from-black/90 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col justify-between p-3 pointer-events-none">
           {/* Top badges */}
           <div className="flex justify-between items-start">
             <span className="text-[10px] font-semibold text-white/90 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded-full border border-white/10">

@@ -12,6 +12,10 @@ import {
   fetchUserPhotos,
   isContentCategory,
 } from './services/commonsApi';
+import {
+  getCachedContributor,
+  saveCachedContributor,
+} from './services/localCache';
 
 // Determine initial username from URL pathname, hash, query param, or default
 function getInitialUsername() {
@@ -52,6 +56,8 @@ export default function App() {
   const [hasMore, setHasMore] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isFromCache, setIsFromCache] = useState(false);
   const [error, setError] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState(getInitialCategory);
   const [activePhoto, setActivePhoto] = useState(null);
@@ -81,29 +87,67 @@ export default function App() {
     setTimeout(() => setShowToast(false), 2500);
   };
 
-  // Load user data and photos
-  const loadUserData = useCallback(async (userToLoad) => {
+  // Load user data and photos (with persistent local cache)
+  const loadUserData = useCallback(async (userToLoad, forceRefresh = false) => {
+    // 1. Instant check from local IndexedDB cache
+    if (!forceRefresh) {
+      try {
+        const cached = await getCachedContributor(userToLoad);
+        if (cached && cached.photos && cached.photos.length > 0) {
+          setUserInfo(cached.userInfo);
+          setTotalUploads(cached.totalUploads);
+          setPhotos(cached.photos);
+          setContinueToken(cached.continueToken);
+          setHasMore(cached.hasMore);
+          setIsFromCache(true);
+          setLoading(false);
+          // Fast cached render complete!
+          return;
+        }
+      } catch (e) {
+        console.warn('Cache lookup failed, proceeding to network', e);
+      }
+    }
+
     setLoading(true);
+    setIsRefreshing(forceRefresh);
     setError(null);
-    setPhotos([]);
-    setContinueToken(null);
-    setHasMore(false);
+    if (!forceRefresh) {
+      setPhotos([]);
+      setContinueToken(null);
+      setHasMore(false);
+    }
     setSelectedCategory(null);
     setActivePhoto(null);
 
     try {
-      // Parallel fetch of user metadata and first batch of photos
+      // Parallel fetch from Wikimedia Commons API
       const [uInfo, uTotal, initialPhotos] = await Promise.all([
         fetchUserInfo(userToLoad),
         fetchTotalUploadCount(userToLoad),
         fetchUserPhotos(userToLoad, null, 40),
       ]);
 
+      const count = uTotal || initialPhotos.photos.length;
       setUserInfo(uInfo);
-      setTotalUploads(uTotal || initialPhotos.photos.length);
+      setTotalUploads(count);
       setPhotos(initialPhotos.photos);
       setContinueToken(initialPhotos.continueToken);
       setHasMore(initialPhotos.hasMore);
+      setIsFromCache(false);
+
+      // Save into persistent local cache for instant zero-latency future visits
+      saveCachedContributor(userToLoad, {
+        photos: initialPhotos.photos,
+        continueToken: initialPhotos.continueToken,
+        totalUploads: count,
+        userInfo: uInfo,
+        hasMore: initialPhotos.hasMore,
+      });
+
+      if (forceRefresh) {
+        triggerToast('Synchronized with Wikimedia Commons');
+      }
 
       // Check if photo param exists in URL
       const searchParams = new URLSearchParams(window.location.search);
@@ -119,6 +163,7 @@ export default function App() {
       setError(`Failed to load photos for "${userToLoad}". Contributor may not exist or network is offline.`);
     } finally {
       setLoading(false);
+      setIsRefreshing(false);
     }
   }, []);
 
@@ -136,7 +181,7 @@ export default function App() {
     loadUserData(username);
   }, [username, loadUserData]);
 
-  // Load more photos for pagination (guarded against concurrent calls)
+  // Load more photos for pagination and persist to local cache
   const handleLoadMore = useCallback(async () => {
     if (isFetchingRef.current || !hasMore || !continueToken) return;
     isFetchingRef.current = true;
@@ -147,7 +192,18 @@ export default function App() {
       setPhotos((prev) => {
         const existingIds = new Set(prev.map((p) => p.id));
         const newOnes = nextBatch.photos.filter((p) => !existingIds.has(p.id));
-        return [...prev, ...newOnes];
+        const merged = [...prev, ...newOnes];
+
+        // Persist newly appended photos to local cache!
+        saveCachedContributor(username, {
+          photos: merged,
+          continueToken: nextBatch.continueToken,
+          totalUploads: totalUploads || merged.length,
+          userInfo: userInfo,
+          hasMore: nextBatch.hasMore,
+        });
+
+        return merged;
       });
       setContinueToken(nextBatch.continueToken);
       setHasMore(nextBatch.hasMore);
@@ -158,7 +214,7 @@ export default function App() {
       isFetchingRef.current = false;
       setLoadingMore(false);
     }
-  }, [username, hasMore, continueToken]);
+  }, [username, hasMore, continueToken, totalUploads, userInfo]);
 
   // Derive categories list with occurrence count from all loaded photos
   const categoriesList = useMemo(() => {
@@ -166,7 +222,6 @@ export default function App() {
     for (const photo of photos) {
       if (!photo.categories) continue;
       for (const cat of photo.categories) {
-        // Prefer content categories
         counts[cat] = (counts[cat] || 0) + 1;
       }
     }
@@ -212,6 +267,9 @@ export default function App() {
         categoriesCount={categoriesList.length}
         onUserChange={handleUserChange}
         onShare={handleShare}
+        onRefresh={() => loadUserData(username, true)}
+        isRefreshing={isRefreshing}
+        isFromCache={isFromCache}
         copied={copied}
       />
 
@@ -230,7 +288,7 @@ export default function App() {
         {loading ? (
           <LoadingSkeleton />
         ) : error ? (
-          <ErrorState error={error} onRetry={() => loadUserData(username)} />
+          <ErrorState error={error} onRetry={() => loadUserData(username, true)} />
         ) : (
           <PhotoGrid
             photos={photos}

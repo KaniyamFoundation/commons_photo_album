@@ -1,5 +1,16 @@
 import React, { useState } from 'react';
-import { Search, Share2, ExternalLink, Image as ImageIcon, Calendar, Award, Check, Layers } from 'lucide-react';
+import {
+  Search,
+  Share2,
+  ExternalLink,
+  Image as ImageIcon,
+  Calendar,
+  Award,
+  Check,
+  Layers,
+  RotateCw,
+  Database,
+} from 'lucide-react';
 import { formatDate } from '../services/commonsApi';
 
 export default function Header({
@@ -9,10 +20,12 @@ export default function Header({
   categoriesCount,
   onUserChange,
   onShare,
+  onRefresh,
+  isRefreshing,
+  isFromCache,
   copied,
 }) {
   const [searchInput, setSearchInput] = useState(username || '');
-  const [isSearching, setIsSearching] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -64,17 +77,38 @@ export default function Header({
             </div>
           </form>
 
-          {/* External links & Share */}
+          {/* External links, Sync & Share */}
           <div className="flex items-center gap-2">
+            {/* Sync / Refresh cache */}
+            <button
+              onClick={onRefresh}
+              disabled={isRefreshing}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-200 bg-slate-800 hover:bg-slate-700 hover:text-white border border-slate-700 rounded-lg transition-colors disabled:opacity-50"
+              title="Refresh / Re-sync from Commons"
+            >
+              <RotateCw
+                className={`w-3.5 h-3.5 text-slate-400 ${
+                  isRefreshing ? 'animate-spin text-blue-400' : ''
+                }`}
+              />
+              <span className="hidden sm:inline">Sync</span>
+            </button>
+
+            {/* Share */}
             <button
               onClick={onShare}
               className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-200 bg-slate-800 hover:bg-slate-700 hover:text-white border border-slate-700 rounded-lg transition-colors"
               title="Share album link"
             >
-              {copied ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Share2 className="w-3.5 h-3.5 text-slate-400" />}
+              {copied ? (
+                <Check className="w-3.5 h-3.5 text-green-400" />
+              ) : (
+                <Share2 className="w-3.5 h-3.5 text-slate-400" />
+              )}
               <span className="hidden sm:inline">{copied ? 'Copied!' : 'Share'}</span>
             </button>
 
+            {/* Open Special:ListFiles */}
             <a
               href={`https://commons.wikimedia.org/wiki/Special:ListFiles/${encodeURIComponent(username)}`}
               target="_blank"
@@ -111,6 +145,13 @@ export default function Header({
                 >
                   <ExternalLink className="w-4 h-4" />
                 </a>
+
+                {isFromCache && (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-950/80 text-emerald-400 border border-emerald-800/60">
+                    <Database className="w-2.5 h-2.5" />
+                    Cached
+                  </span>
+                )}
               </div>
               <p className="text-xs sm:text-sm text-slate-400 mt-0.5">
                 Wikimedia Commons Contributor Portfolio
