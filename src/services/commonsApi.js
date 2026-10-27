@@ -197,13 +197,17 @@ export async function fetchUserPhotos(username, continueToken = null, limit = 40
         const aspectRatio = width / height;
 
         // Generate high-resolution web-optimized preview (1280px / 1920px) from Wikimedia standard steps
-        // Avoids downloading massive 15MB-50MB uncompressed raw files for browser viewing
+        // Checks both width and height so portrait photos are also full-resolution
         let previewUrl = thumbUrl;
         if (thumbUrl && thumbUrl.includes('thumb.wikimedia.org')) {
-          let step = 1280;
-          if (width >= 2400) step = 1920;
-          else if (width < 1200) step = 960;
-          if (width > 600) {
+          let step = 1920;
+          const maxDim = Math.max(width, height);
+          if (maxDim >= 1920) step = 1920;
+          else if (maxDim >= 1200) step = 1280;
+          else if (maxDim > 600) step = 960;
+          else step = 500;
+
+          if (maxDim > 500) {
             previewUrl = thumbUrl.replace(/\/\d+px-/, `/${step}px-`);
           }
         }

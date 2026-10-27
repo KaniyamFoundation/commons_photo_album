@@ -12,6 +12,7 @@ import {
   Award,
   Check,
   Maximize2,
+  Minimize2,
   HardDrive,
   MapPin,
   Loader2,
@@ -25,11 +26,12 @@ export default function PhotoLightbox({
   onSelectPhoto,
   onFilterByCategory,
 }) {
-  // Show info drawer by default only on desktop screens so mobile shows the photo full-screen
-  const [showInfo, setShowInfo] = useState(() => window.innerWidth >= 1024);
+  // Start with info drawer closed by default so photo fills 100% of the screen
+  const [showInfo, setShowInfo] = useState(false);
   const [copied, setCopied] = useState(false);
   const [touchStart, setTouchStart] = useState(null);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const currentIndex = photos.findIndex((p) => p.id === photo.id);
   const hasPrev = currentIndex > 0;
@@ -55,6 +57,7 @@ export default function PhotoLightbox({
       if (e.key === 'ArrowLeft') handlePrev();
       if (e.key === 'ArrowRight') handleNext();
       if (e.key === 'i' || e.key === 'I') setShowInfo((prev) => !prev);
+      if (e.key === 'f' || e.key === 'F') toggleFullScreen();
     };
 
     window.addEventListener('keydown', handleKeyDown);
@@ -83,6 +86,20 @@ export default function PhotoLightbox({
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const toggleFullScreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement
+        .requestFullscreen()
+        .then(() => setIsFullscreen(true))
+        .catch(() => {});
+    } else {
+      document
+        .exitFullscreen()
+        .then(() => setIsFullscreen(false))
+        .catch(() => {});
+    }
+  };
+
   // Safe megapixels calculation
   const megaPixels =
     photo.width && photo.height
@@ -95,13 +112,13 @@ export default function PhotoLightbox({
   const artistName = photo.artist || 'Contributor';
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/95 flex flex-col backdrop-blur-md select-none overflow-hidden animate-in fade-in duration-150">
+    <div className="fixed inset-0 z-50 bg-black flex flex-col select-none overflow-hidden animate-in fade-in duration-150">
       {/* Top Navigation Bar */}
-      <div className="h-14 px-4 flex items-center justify-between border-b border-white/10 bg-black/60 z-30 shrink-0">
+      <div className="h-14 px-3 sm:px-5 flex items-center justify-between border-b border-white/10 bg-black/80 backdrop-blur-md z-30 shrink-0">
         <div className="flex items-center gap-3">
           <button
             onClick={onClose}
-            className="p-2 rounded-full hover:bg-white/10 text-white/80 hover:text-white transition-colors"
+            className="p-2 rounded-full hover:bg-white/15 text-white/80 hover:text-white transition-colors"
             title="Close (Esc)"
           >
             <X className="w-5 h-5" />
@@ -109,14 +126,26 @@ export default function PhotoLightbox({
           <span className="text-xs text-white/70 font-medium hidden sm:inline">
             {currentIndex + 1} of {photos.length}
           </span>
+          <span className="text-xs text-white/90 font-semibold truncate max-w-[200px] sm:max-w-md hidden md:inline">
+            {photo.title}
+          </span>
         </div>
 
         {/* Action icons */}
         <div className="flex items-center gap-1.5 sm:gap-2">
+          {/* Fullscreen browser toggle */}
+          <button
+            onClick={toggleFullScreen}
+            className="p-2 rounded-full hover:bg-white/15 text-white/80 hover:text-white transition-colors"
+            title={isFullscreen ? 'Exit Fullscreen (F)' : 'Fullscreen (F)'}
+          >
+            {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+          </button>
+
           {/* Share */}
           <button
             onClick={handleCopyLink}
-            className="p-2 rounded-full hover:bg-white/10 text-white/80 hover:text-white transition-colors"
+            className="p-2 rounded-full hover:bg-white/15 text-white/80 hover:text-white transition-colors"
             title="Copy photo link"
           >
             {copied ? <Check className="w-4 h-4 text-green-400" /> : <Share2 className="w-4 h-4" />}
@@ -128,8 +157,8 @@ export default function PhotoLightbox({
             target="_blank"
             rel="noopener noreferrer"
             download
-            className="p-2 rounded-full hover:bg-white/10 text-white/80 hover:text-white transition-colors"
-            title="Download full resolution"
+            className="p-2 rounded-full hover:bg-white/15 text-white/80 hover:text-white transition-colors"
+            title="Download original resolution"
           >
             <Download className="w-4 h-4" />
           </a>
@@ -139,18 +168,20 @@ export default function PhotoLightbox({
             href={photo.commonsUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1 px-2.5 py-1.5 rounded-full hover:bg-white/10 text-xs text-blue-400 hover:text-white transition-colors border border-blue-500/30"
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-full hover:bg-white/15 text-xs text-blue-400 hover:text-white transition-colors border border-blue-500/30"
             title="Open file page on Wikimedia Commons"
           >
             <ExternalLink className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Commons Page</span>
+            <span className="hidden sm:inline">Commons</span>
           </a>
 
           {/* Toggle Info Drawer */}
           <button
             onClick={() => setShowInfo((prev) => !prev)}
             className={`p-2 rounded-full transition-colors ${
-              showInfo ? 'bg-blue-600 text-white' : 'hover:bg-white/10 text-white/80 hover:text-white'
+              showInfo
+                ? 'bg-blue-600 text-white'
+                : 'hover:bg-white/15 text-white/80 hover:text-white'
             }`}
             title="Toggle details panel (i)"
           >
@@ -159,30 +190,29 @@ export default function PhotoLightbox({
         </div>
       </div>
 
-      {/* Main Content: Photo view + Info sidebar */}
+      {/* Main Content Area */}
       <div
         className="flex-1 flex overflow-hidden relative"
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
-        {/* Photo Container */}
-        <div className="flex-1 flex items-center justify-center p-2 sm:p-6 relative overflow-hidden">
+        {/* Photo Container: Fills 100% of the screen */}
+        <div className="flex-1 w-full h-full flex items-center justify-center relative overflow-hidden bg-black">
           {/* Previous Button */}
           {hasPrev && (
             <button
               onClick={handlePrev}
-              className="absolute left-3 top-1/2 -translate-y-1/2 p-2.5 rounded-full bg-black/60 hover:bg-black/80 text-white/80 hover:text-white transition-all backdrop-blur-md z-10 border border-white/10 hidden sm:flex items-center justify-center"
+              className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/60 hover:bg-black/90 text-white/90 hover:text-white transition-all backdrop-blur-md z-20 border border-white/10 flex items-center justify-center shadow-2xl group"
               title="Previous photo (Left arrow)"
             >
-              <ChevronLeft className="w-6 h-6" />
+              <ChevronLeft className="w-6 h-6 transition-transform group-hover:-translate-x-0.5" />
             </button>
           )}
 
-          {/* Photo with progressive loading */}
-          <div className="max-w-full max-h-full flex items-center justify-center relative">
-            {/* Loading spinner while high-res loads */}
+          {/* Photo Display: Maximum viewport utilization */}
+          <div className="w-full h-full flex items-center justify-center p-1 sm:p-3 relative">
             {!imageLoaded && (
-              <div className="absolute inset-0 flex items-center justify-center z-10">
+              <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
                 <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
               </div>
             )}
@@ -193,12 +223,11 @@ export default function PhotoLightbox({
               alt={photo.title}
               onLoad={() => setImageLoaded(true)}
               onError={(e) => {
-                // If 1920px fails, fallback to standard thumbnail
                 if (e.target.src !== photo.thumbUrl) {
                   e.target.src = photo.thumbUrl;
                 }
               }}
-              className={`max-h-[calc(100vh-80px)] max-w-full object-contain rounded-lg shadow-2xl transition-opacity duration-300 select-none ${
+              className={`max-h-[calc(100vh-68px)] max-w-full w-auto h-auto object-contain rounded shadow-2xl transition-all duration-200 select-none ${
                 imageLoaded ? 'opacity-100' : 'opacity-40'
               }`}
             />
@@ -208,17 +237,17 @@ export default function PhotoLightbox({
           {hasNext && (
             <button
               onClick={handleNext}
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-2.5 rounded-full bg-black/60 hover:bg-black/80 text-white/80 hover:text-white transition-all backdrop-blur-md z-10 border border-white/10 hidden sm:flex items-center justify-center"
+              className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-black/60 hover:bg-black/90 text-white/90 hover:text-white transition-all backdrop-blur-md z-20 border border-white/10 flex items-center justify-center shadow-2xl group"
               title="Next photo (Right arrow)"
             >
-              <ChevronRight className="w-6 h-6" />
+              <ChevronRight className="w-6 h-6 transition-transform group-hover:translate-x-0.5" />
             </button>
           )}
         </div>
 
-        {/* Info Sidebar (like Google Photos info panel) */}
+        {/* Info Sidebar: Collapsible slide-over drawer */}
         {showInfo && (
-          <aside className="w-full sm:w-96 bg-slate-900 border-l border-white/10 flex flex-col overflow-y-auto shrink-0 z-20 absolute sm:relative inset-y-0 right-0 max-h-full shadow-2xl animate-in slide-in-from-right duration-200">
+          <aside className="w-full sm:w-96 bg-slate-900 border-l border-white/10 flex flex-col overflow-y-auto shrink-0 z-30 absolute inset-y-0 right-0 max-h-full shadow-2xl animate-in slide-in-from-right duration-200">
             {/* Drawer Header */}
             <div className="p-4 border-b border-slate-800 flex items-center justify-between">
               <h3 className="font-bold text-white text-sm">Info & Details</h3>
