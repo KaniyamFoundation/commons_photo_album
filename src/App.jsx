@@ -33,9 +33,21 @@ function getInitialUsername() {
   }
 
   // 3. Check pathname /username
-  const path = window.location.pathname.replace(/^\//, '').trim();
-  if (path && path !== 'index.html' && !path.includes('.')) {
-    const cleanPath = decodeURIComponent(path.split('/')[0].trim());
+  // If hosted on GitHub Pages (e.g. kaniyamfoundation.github.io/commons_photo_album/)
+  // or a subfolder, ignore the repo name segment so it doesn't get treated as a username.
+  let pathSegments = window.location.pathname
+    .split('/')
+    .filter((s) => s && s !== 'index.html' && !s.includes('.'));
+
+  if (
+    window.location.hostname.includes('github.io') ||
+    pathSegments[0] === 'commons_photo_album'
+  ) {
+    pathSegments = pathSegments.slice(1);
+  }
+
+  if (pathSegments.length > 0) {
+    const cleanPath = decodeURIComponent(pathSegments[0].trim());
     if (cleanPath) return cleanPath;
   }
 
