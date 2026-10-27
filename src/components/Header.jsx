@@ -57,16 +57,19 @@ export default function Header({
             </div>
           </div>
 
-          {/* Search username input */}
-          <form onSubmit={handleSubmit} className="flex-1 max-w-md mx-2 sm:mx-6">
-            <div className="relative">
+          {/* Search username input with prompt */}
+          <form onSubmit={handleSubmit} className="flex-1 max-w-xl mx-2 sm:mx-6 flex items-center gap-2.5">
+            <span className="hidden sm:inline text-xs font-medium text-slate-300 whitespace-nowrap shrink-0">
+              Give a wikimedia commons user name:
+            </span>
+            <div className="relative flex-1">
               <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
-                placeholder="Enter Commons username (e.g. Tshrinivasan)..."
+                placeholder="Give a wikimedia commons user name..."
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
-                className="w-full pl-10 pr-20 py-2 bg-slate-800/80 hover:bg-slate-800 focus:bg-slate-800 border border-slate-700/80 focus:border-blue-500 rounded-full text-sm text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
+                className="w-full pl-10 pr-16 py-2 bg-slate-800/80 hover:bg-slate-800 focus:bg-slate-800 border border-slate-700/80 focus:border-blue-500 rounded-full text-sm text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all"
               />
               <button
                 type="submit"
