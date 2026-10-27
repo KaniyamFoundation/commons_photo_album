@@ -196,6 +196,18 @@ export async function fetchUserPhotos(username, continueToken = null, limit = 40
         const height = info.height || 600;
         const aspectRatio = width / height;
 
+        // Generate high-resolution web-optimized preview (1280px / 1920px) from Wikimedia standard steps
+        // Avoids downloading massive 15MB-50MB uncompressed raw files for browser viewing
+        let previewUrl = thumbUrl;
+        if (thumbUrl && thumbUrl.includes('thumb.wikimedia.org')) {
+          let step = 1280;
+          if (width >= 2400) step = 1920;
+          else if (width < 1200) step = 960;
+          if (width > 600) {
+            previewUrl = thumbUrl.replace(/\/\d+px-/, `/${step}px-`);
+          }
+        }
+
         return {
           id: p.pageid ? String(p.pageid) : title,
           pageId: p.pageid,
@@ -212,6 +224,7 @@ export async function fetchUserPhotos(username, continueToken = null, limit = 40
           height: height,
           aspectRatio: aspectRatio,
           thumbUrl: thumbUrl,
+          previewUrl: previewUrl,
           originalUrl: originalUrl,
           fileSize: info.size || 0,
           commonsUrl: info.descriptionurl || `https://commons.wikimedia.org/wiki/${encodeURIComponent(p.title)}`,

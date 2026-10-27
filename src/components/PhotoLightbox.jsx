@@ -189,9 +189,15 @@ export default function PhotoLightbox({
 
             <img
               key={photo.id}
-              src={photo.originalUrl || photo.thumbUrl}
+              src={photo.previewUrl || photo.thumbUrl || photo.originalUrl}
               alt={photo.title}
               onLoad={() => setImageLoaded(true)}
+              onError={(e) => {
+                // If 1920px fails, fallback to standard thumbnail
+                if (e.target.src !== photo.thumbUrl) {
+                  e.target.src = photo.thumbUrl;
+                }
+              }}
               className={`max-h-[calc(100vh-80px)] max-w-full object-contain rounded-lg shadow-2xl transition-opacity duration-300 select-none ${
                 imageLoaded ? 'opacity-100' : 'opacity-40'
               }`}
