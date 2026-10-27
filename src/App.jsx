@@ -58,6 +58,7 @@ export default function App() {
   const [toastMessage, setToastMessage] = useState('');
   const [showToast, setShowToast] = useState(false);
   const [copied, setCopied] = useState(false);
+  const isFetchingRef = useRef(false);
 
   // Sync browser URL whenever username changes
   const updateUrl = useCallback((newUsername, category = null) => {
@@ -135,9 +136,10 @@ export default function App() {
     loadUserData(username);
   }, [username, loadUserData]);
 
-  // Load more photos for pagination
-  const handleLoadMore = async () => {
-    if (loadingMore || !hasMore || !continueToken) return;
+  // Load more photos for pagination (guarded against concurrent calls)
+  const handleLoadMore = useCallback(async () => {
+    if (isFetchingRef.current || !hasMore || !continueToken) return;
+    isFetchingRef.current = true;
     setLoadingMore(true);
 
     try {
@@ -153,9 +155,10 @@ export default function App() {
       console.error('Failed to load more photos:', err);
       triggerToast('Failed to load more photos. Check connection.');
     } finally {
+      isFetchingRef.current = false;
       setLoadingMore(false);
     }
-  };
+  }, [username, hasMore, continueToken]);
 
   // Derive categories list with occurrence count from all loaded photos
   const categoriesList = useMemo(() => {

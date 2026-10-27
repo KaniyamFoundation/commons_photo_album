@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import PhotoCard from './PhotoCard';
 import { Calendar, LayoutGrid, Clock, Loader2, ImageOff } from 'lucide-react';
 
@@ -12,6 +12,7 @@ export default function PhotoGrid({
   totalAvailable,
 }) {
   const [viewMode, setViewMode] = useState('timeline'); // 'timeline' or 'grid'
+  const sentinelRef = useRef(null);
 
   // Filter photos by selected category if any
   const filteredPhotos = useMemo(() => {
@@ -36,7 +37,33 @@ export default function PhotoGrid({
     return groups;
   }, [filteredPhotos]);
 
-  if (filteredPhotos.length === 0) {
+  // Automatic infinite scroll via IntersectionObserver
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel || !hasMore || loadingMore) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const first = entries[0];
+        if (first.isIntersecting && hasMore && !loadingMore) {
+          onLoadMore();
+        }
+      },
+      {
+        root: null, // viewport
+        rootMargin: '500px', // trigger 500px before reaching the exact bottom
+        threshold: 0.05,
+      }
+    );
+
+    observer.observe(sentinel);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [hasMore, loadingMore, onLoadMore]);
+
+  if (filteredPhotos.length === 0 && !loadingMore) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-20 text-center">
         <div className="w-16 h-16 rounded-2xl bg-slate-800 flex items-center justify-center mx-auto mb-4 text-slate-500">
@@ -48,6 +75,14 @@ export default function PhotoGrid({
             ? `No photos found in category "${selectedCategory}" among the loaded photos.`
             : 'No photos found for this contributor.'}
         </p>
+        {hasMore && (
+          <button
+            onClick={onLoadMore}
+            className="mt-4 px-4 py-2 text-xs font-semibold text-blue-400 bg-blue-900/30 hover:bg-blue-900/50 rounded-lg border border-blue-800 transition-colors"
+          >
+            Load more photos to search deeper
+          </button>
+        )}
       </div>
     );
   }
@@ -131,23 +166,25 @@ export default function PhotoGrid({
         </div>
       )}
 
-      {/* Load More Button / Indicator */}
-      {hasMore && !selectedCategory && (
-        <div className="mt-12 text-center pb-8">
-          <button
-            onClick={onLoadMore}
-            disabled={loadingMore}
-            className="inline-flex items-center gap-2 px-6 py-2.5 bg-slate-800 hover:bg-slate-750 text-white font-semibold text-sm rounded-full border border-slate-700 shadow-md transition-all hover:border-slate-600 disabled:opacity-50"
-          >
-            {loadingMore ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin text-blue-400" />
-                <span>Loading more photos...</span>
-              </>
-            ) : (
-              <span>Load More Photos</span>
-            )}
-          </button>
+      {/* Infinite Scroll Sentinel & Loading Indicator */}
+      {hasMore && (
+        <div
+          ref={sentinelRef}
+          className="mt-8 py-10 flex flex-col items-center justify-center gap-2.5 text-slate-400"
+        >
+          <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
+          <span className="text-xs font-medium text-slate-400">
+            Loading more photos automatically...
+          </span>
+        </div>
+      )}
+
+      {/* End of results indicator */}
+      {!hasMore && filteredPhotos.length > 0 && (
+        <div className="mt-12 py-10 text-center text-xs text-slate-500 flex items-center justify-center gap-3">
+          <div className="h-px bg-slate-800 w-16 sm:w-24"></div>
+          <span>All {totalAvailable || filteredPhotos.length} photos loaded</span>
+          <div className="h-px bg-slate-800 w-16 sm:w-24"></div>
         </div>
       )}
     </div>
