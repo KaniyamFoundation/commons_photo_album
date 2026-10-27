@@ -26,8 +26,8 @@ export default function PhotoLightbox({
   onSelectPhoto,
   onFilterByCategory,
 }) {
-  // Start with info drawer closed by default so photo fills 100% of the screen
-  const [showInfo, setShowInfo] = useState(false);
+  // Show info drawer on the right side always by default
+  const [showInfo, setShowInfo] = useState(true);
   const [copied, setCopied] = useState(false);
   const [touchStart, setTouchStart] = useState(null);
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -190,14 +190,14 @@ export default function PhotoLightbox({
         </div>
       </div>
 
-      {/* Main Content Area */}
+      {/* Main Content Area: Side-by-side photo and info on desktop/tablet */}
       <div
-        className="flex-1 flex overflow-hidden relative"
+        className="flex-1 flex flex-col md:flex-row overflow-hidden relative"
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
-        {/* Photo Container: Fills 100% of the screen */}
-        <div className="flex-1 w-full h-full flex items-center justify-center relative overflow-hidden bg-black">
+        {/* Photo Container: Takes remaining space on the left */}
+        <div className="flex-1 w-full h-full flex items-center justify-center relative overflow-hidden bg-black min-w-0">
           {/* Previous Button */}
           {hasPrev && (
             <button
@@ -245,15 +245,16 @@ export default function PhotoLightbox({
           )}
         </div>
 
-        {/* Info Sidebar: Collapsible slide-over drawer */}
+        {/* Info Sidebar: Always docked on the right side */}
         {showInfo && (
-          <aside className="w-full sm:w-96 bg-slate-900 border-l border-white/10 flex flex-col overflow-y-auto shrink-0 z-30 absolute inset-y-0 right-0 max-h-full shadow-2xl animate-in slide-in-from-right duration-200">
+          <aside className="w-full md:w-80 lg:w-96 bg-slate-900 border-t md:border-t-0 md:border-l border-white/10 flex flex-col overflow-y-auto shrink-0 z-20 h-72 md:h-full max-h-[50vh] md:max-h-full shadow-2xl">
             {/* Drawer Header */}
-            <div className="p-4 border-b border-slate-800 flex items-center justify-between">
+            <div className="p-4 border-b border-slate-800 flex items-center justify-between shrink-0">
               <h3 className="font-bold text-white text-sm">Info & Details</h3>
               <button
                 onClick={() => setShowInfo(false)}
                 className="p-1 rounded-md text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+                title="Hide info panel"
               >
                 <X className="w-4 h-4" />
               </button>
