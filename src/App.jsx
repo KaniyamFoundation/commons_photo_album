@@ -66,6 +66,7 @@ export default function App() {
   const [showToast, setShowToast] = useState(false);
   const [copied, setCopied] = useState(false);
   const [showGoTop, setShowGoTop] = useState(false);
+  const [timeOrder, setTimeOrder] = useState('desc'); // 'desc' (Newest first) or 'asc' (Oldest first)
   const isFetchingRef = useRef(false);
 
   // Monitor scroll position for "Go to Top" button
@@ -290,6 +291,23 @@ export default function App() {
     }
   };
 
+  // Filter and sort photos matching user category and chronological timeOrder
+  const sortedCategoryPhotos = useMemo(() => {
+    let result = photos;
+    if (selectedCategory) {
+      result = photos.filter((p) =>
+        p.categories.some(
+          (c) => c.toLowerCase() === selectedCategory.toLowerCase()
+        )
+      );
+    }
+    return [...result].sort((a, b) => {
+      const timeA = new Date(a.uploadDate || a.dateTaken || 0).getTime() || 0;
+      const timeB = new Date(b.uploadDate || b.dateTaken || 0).getTime() || 0;
+      return timeOrder === 'asc' ? timeA - timeB : timeB - timeA;
+    });
+  }, [photos, selectedCategory, timeOrder]);
+
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col selection:bg-blue-600 selection:text-white">
       {/* Header with profile and stats */}
@@ -331,6 +349,8 @@ export default function App() {
             onLoadMore={handleLoadMore}
             loadingMore={loadingMore}
             totalAvailable={totalUploads}
+            timeOrder={timeOrder}
+            onTimeOrderChange={setTimeOrder}
           />
         )}
       </main>
@@ -339,15 +359,7 @@ export default function App() {
       {activePhoto && (
         <PhotoLightbox
           photo={activePhoto}
-          photos={
-            selectedCategory
-              ? photos.filter((p) =>
-                  p.categories.some(
-                    (c) => c.toLowerCase() === selectedCategory.toLowerCase()
-                  )
-                )
-              : photos
-          }
+          photos={sortedCategoryPhotos}
           onClose={() => setActivePhoto(null)}
           onSelectPhoto={(photo) => setActivePhoto(photo)}
           onFilterByCategory={(cat) => {

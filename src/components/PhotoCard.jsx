@@ -27,7 +27,9 @@ export default function PhotoCard({ photo, onClick, isSquare = true }) {
   return (
     <div
       onClick={() => onClick(photo)}
-      className="group relative rounded-xl overflow-hidden bg-slate-850 cursor-pointer shadow-sm hover:shadow-xl hover:shadow-black/50 transition-all duration-200 transform hover:-translate-y-0.5 border border-slate-800/80 hover:border-slate-700 select-none"
+      className={`group relative rounded-xl overflow-hidden bg-slate-850 cursor-pointer shadow-sm hover:shadow-xl hover:shadow-black/50 transition-all duration-200 transform hover:-translate-y-0.5 border border-slate-800/80 hover:border-slate-700 select-none ${
+        !isSquare ? 'break-inside-avoid mb-4 lg:mb-5 w-full inline-block' : ''
+      }`}
     >
       {/* Aspect Ratio Container */}
       <div

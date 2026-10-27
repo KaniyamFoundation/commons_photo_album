@@ -1,6 +1,15 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import PhotoCard from './PhotoCard';
-import { Calendar, LayoutGrid, Clock, Columns, Loader2, ImageOff } from 'lucide-react';
+import {
+  Calendar,
+  LayoutGrid,
+  Clock,
+  Columns,
+  Loader2,
+  ImageOff,
+  ArrowUp,
+  ArrowDown,
+} from 'lucide-react';
 
 export default function PhotoGrid({
   photos,
@@ -10,33 +19,48 @@ export default function PhotoGrid({
   onLoadMore,
   loadingMore,
   totalAvailable,
+  timeOrder: propTimeOrder,
+  onTimeOrderChange,
 }) {
-  const [viewMode, setViewMode] = useState('timeline'); // 'timeline' or 'stream'
-  const [layoutStyle, setLayoutStyle] = useState('grid'); // 'grid' (Google Photos square) or 'masonry'
-  const [tileSize, setTileSize] = useState('large'); // 'large', 'medium', 'compact'
+  // Defaults requested: Stream, Masonry, Large
+  const [viewMode, setViewMode] = useState('stream'); // 'stream' (default) or 'timeline'
+  const [layoutStyle, setLayoutStyle] = useState('masonry'); // 'masonry' (default) or 'grid'
+  const [tileSize, setTileSize] = useState('large'); // 'large' (default), 'medium', 'compact'
+  const [localTimeOrder, setLocalTimeOrder] = useState('desc'); // 'desc' (Newest first) or 'asc' (Oldest first)
+
+  const timeOrder = propTimeOrder || localTimeOrder;
+  const setTimeOrder = onTimeOrderChange || setLocalTimeOrder;
+
   const sentinelRef = useRef(null);
 
-  // Filter photos by selected category if any
+  // Filter photos by selected category and sort according to timeOrder
   const filteredPhotos = useMemo(() => {
-    if (!selectedCategory) return photos;
-    return photos.filter((p) =>
-      p.categories.some(
-        (c) => c.toLowerCase() === selectedCategory.toLowerCase()
-      )
-    );
-  }, [photos, selectedCategory]);
+    let result = photos;
+    if (selectedCategory) {
+      result = photos.filter((p) =>
+        p.categories.some(
+          (c) => c.toLowerCase() === selectedCategory.toLowerCase()
+        )
+      );
+    }
+    return [...result].sort((a, b) => {
+      const timeA = new Date(a.uploadDate || a.dateTaken || 0).getTime() || 0;
+      const timeB = new Date(b.uploadDate || b.dateTaken || 0).getTime() || 0;
+      return timeOrder === 'asc' ? timeA - timeB : timeB - timeA;
+    });
+  }, [photos, selectedCategory, timeOrder]);
 
-  // Group photos by Year/Month for Timeline view
+  // Group photos by Year/Month for Timeline view preserving chronological order
   const groupedByTimeline = useMemo(() => {
-    const groups = {};
+    const groups = new Map();
     for (const photo of filteredPhotos) {
       const key = photo.yearMonth || 'Other';
-      if (!groups[key]) {
-        groups[key] = [];
+      if (!groups.has(key)) {
+        groups.set(key, []);
       }
-      groups[key].push(photo);
+      groups.get(key).push(photo);
     }
-    return groups;
+    return Array.from(groups.entries());
   }, [filteredPhotos]);
 
   // Automatic infinite scroll via IntersectionObserver
@@ -102,13 +126,13 @@ export default function PhotoGrid({
         return 'grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-7 xl:grid-cols-8 2xl:grid-cols-10 gap-1.5 sm:gap-2';
       }
     } else {
-      // Masonry Columns
+      // Masonry Columns (Cards have break-inside-avoid and bottom margin)
       if (tileSize === 'large') {
-        return 'columns-1 sm:columns-2 md:columns-3 lg:columns-3 xl:columns-4 2xl:columns-5 gap-4 lg:gap-5 space-y-4 lg:space-y-5';
+        return 'columns-1 sm:columns-2 md:columns-3 lg:columns-3 xl:columns-4 2xl:columns-5 gap-4 lg:gap-5';
       } else if (tileSize === 'medium') {
-        return 'columns-2 sm:columns-3 md:columns-4 lg:columns-5 xl:columns-6 gap-3.5 space-y-3.5';
+        return 'columns-2 sm:columns-3 md:columns-4 lg:columns-5 xl:columns-6 gap-3.5';
       } else {
-        return 'columns-3 sm:columns-4 md:columns-6 lg:columns-7 xl:columns-8 gap-2 space-y-2';
+        return 'columns-3 sm:columns-4 md:columns-6 lg:columns-7 xl:columns-8 gap-2';
       }
     }
   };
@@ -127,7 +151,7 @@ export default function PhotoGrid({
           )}
         </div>
 
-        {/* View, Layout Style & Size Toggles */}
+        {/* View, Layout Style, Time Order & Tile Size Toggles */}
         <div className="flex flex-wrap items-center gap-2">
           {/* Tile Size Selector: Large, Medium, Compact */}
           <div className="flex items-center gap-1 bg-slate-850 p-1 rounded-lg border border-slate-700/80">
@@ -169,6 +193,18 @@ export default function PhotoGrid({
           {/* Timeline vs Stream View */}
           <div className="flex items-center gap-1 bg-slate-850 p-1 rounded-lg border border-slate-700/80">
             <button
+              onClick={() => setViewMode('stream')}
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                viewMode === 'stream'
+                  ? 'bg-slate-700 text-white shadow-sm'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+              title="Continuous photo stream (Default)"
+            >
+              <LayoutGrid className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Stream</span>
+            </button>
+            <button
               onClick={() => setViewMode('timeline')}
               className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
                 viewMode === 'timeline'
@@ -180,22 +216,52 @@ export default function PhotoGrid({
               <Clock className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Timeline</span>
             </button>
+          </div>
+
+          {/* Time Order: Up arrow (Oldest first) vs Down arrow (Newest first) */}
+          <div className="flex items-center gap-1 bg-slate-850 p-1 rounded-lg border border-slate-700/80" title="Sort by time order">
             <button
-              onClick={() => setViewMode('stream')}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
-                viewMode === 'stream'
-                  ? 'bg-slate-700 text-white shadow-sm'
+              onClick={() => setTimeOrder('desc')}
+              className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                timeOrder === 'desc'
+                  ? 'bg-blue-600 text-white shadow-sm'
                   : 'text-slate-400 hover:text-slate-200'
               }`}
-              title="Continuous photo stream"
+              title="Newest photos first (Down arrow)"
+              aria-label="Newest first"
             >
-              <LayoutGrid className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Stream</span>
+              <ArrowDown className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Newest</span>
+            </button>
+            <button
+              onClick={() => setTimeOrder('asc')}
+              className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${
+                timeOrder === 'asc'
+                  ? 'bg-blue-600 text-white shadow-sm'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+              title="Oldest photos first (Up arrow)"
+              aria-label="Oldest first"
+            >
+              <ArrowUp className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Oldest</span>
             </button>
           </div>
 
-          {/* Grid vs Masonry */}
+          {/* Masonry vs Grid */}
           <div className="flex items-center gap-1 bg-slate-850 p-1 rounded-lg border border-slate-700/80">
+            <button
+              onClick={() => setLayoutStyle('masonry')}
+              className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium transition-colors ${
+                layoutStyle === 'masonry'
+                  ? 'bg-slate-700 text-white shadow-sm'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+              title="Masonry aspect ratio layout (Default)"
+            >
+              <Columns className="w-3 h-3" />
+              <span className="hidden md:inline">Masonry</span>
+            </button>
             <button
               onClick={() => setLayoutStyle('grid')}
               className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium transition-colors ${
@@ -208,18 +274,6 @@ export default function PhotoGrid({
               <LayoutGrid className="w-3 h-3" />
               <span className="hidden md:inline">Grid</span>
             </button>
-            <button
-              onClick={() => setLayoutStyle('masonry')}
-              className={`flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium transition-colors ${
-                layoutStyle === 'masonry'
-                  ? 'bg-slate-700 text-white shadow-sm'
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
-              title="Masonry aspect ratio layout"
-            >
-              <Columns className="w-3 h-3" />
-              <span className="hidden md:inline">Masonry</span>
-            </button>
           </div>
         </div>
       </div>
@@ -227,7 +281,47 @@ export default function PhotoGrid({
       {/* Grid Content */}
       {viewMode === 'timeline' ? (
         <div className="space-y-10">
-          {Object.entries(groupedByTimeline).map(([period, groupPhotos]) => (
+          {/* Timeline View Header & Time Order Bar */}
+          <div className="flex flex-wrap items-center justify-between px-4 py-2.5 bg-slate-850/80 rounded-xl border border-slate-800 text-xs text-slate-300 gap-2 shadow-sm">
+            <div className="flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-blue-400" />
+              <span className="font-bold text-white">Timeline Order:</span>
+              <span className="text-slate-300">
+                {timeOrder === 'desc' ? 'Newest to Oldest (Descending)' : 'Oldest to Newest (Ascending)'}
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-slate-400 text-xs hidden sm:inline mr-1">Time order:</span>
+              <button
+                onClick={() => setTimeOrder('desc')}
+                className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                  timeOrder === 'desc'
+                    ? 'bg-blue-600 text-white shadow-sm ring-1 ring-blue-400'
+                    : 'bg-slate-800 text-slate-400 hover:text-white border border-slate-700'
+                }`}
+                title="Sort Newest First (Down arrow)"
+                aria-label="Newest first"
+              >
+                <ArrowDown className="w-3.5 h-3.5" />
+                <span>Newest first</span>
+              </button>
+              <button
+                onClick={() => setTimeOrder('asc')}
+                className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                  timeOrder === 'asc'
+                    ? 'bg-blue-600 text-white shadow-sm ring-1 ring-blue-400'
+                    : 'bg-slate-800 text-slate-400 hover:text-white border border-slate-700'
+                }`}
+                title="Sort Oldest First (Up arrow)"
+                aria-label="Oldest first"
+              >
+                <ArrowUp className="w-3.5 h-3.5" />
+                <span>Oldest first</span>
+              </button>
+            </div>
+          </div>
+
+          {groupedByTimeline.map(([period, groupPhotos]) => (
             <div key={period} className="relative">
               {/* Timeline Header (Google Photos sticky month header style) */}
               <div className="sticky top-[180px] sm:top-[190px] z-10 py-2.5 mb-4 bg-slate-900/95 backdrop-blur-md flex items-center justify-between border-b border-slate-800/80">
@@ -237,9 +331,11 @@ export default function PhotoGrid({
                     {period}
                   </h3>
                 </div>
-                <span className="text-xs text-slate-400 font-medium px-2 py-0.5 rounded-full bg-slate-800 border border-slate-700">
-                  {groupPhotos.length} {groupPhotos.length === 1 ? 'photo' : 'photos'}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-slate-400 font-medium px-2 py-0.5 rounded-full bg-slate-800 border border-slate-700">
+                    {groupPhotos.length} {groupPhotos.length === 1 ? 'photo' : 'photos'}
+                  </span>
+                </div>
               </div>
 
               {/* Photos for this period */}
