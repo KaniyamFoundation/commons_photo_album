@@ -168,7 +168,6 @@ export default function App() {
       setContinueToken(null);
       setHasMore(false);
     }
-    setSelectedCategory(null);
     setActivePhoto(null);
 
     try {
@@ -220,6 +219,8 @@ export default function App() {
 
   // Handle user change (e.g. from search, clicking sample, or clicking logo to reset)
   const handleUserChange = (newUsername) => {
+    // Filters belong to one contributor; a ?category= link must survive the initial load
+    setSelectedCategory(null);
     if (!newUsername || (typeof newUsername === 'string' && newUsername.trim() === '')) {
       setUsername(null);
       setPhotos([]);
